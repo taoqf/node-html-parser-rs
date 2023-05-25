@@ -31,7 +31,7 @@ services:
     links:
       - 01factory-web:webserver
 
-  docode:
+  doccode:
     image: dfactory01-docker.pkg.coding.net/01factory/release/doccode:latest
 
   adminer:
