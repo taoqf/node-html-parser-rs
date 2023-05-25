@@ -1,0 +1,55 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node-postgres
+{
+	"name": "01factory/dev",
+	"dockerComposeFile": "./docker-compose.yml",
+	"service": "01factory-app",
+	"workspaceFolder": "/01factory",
+	// "postCreateCommand": "pnpm i --prefer-offline && pnpm dev",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"mm.mmstudio",
+				"analytic-signal.preview-pdf"
+			],
+			"settings": {
+				"git.enableSmartCommit": true,
+				"files.eol": "\n",
+				"explorer.confirmDelete": false,
+				"git.confirmSync": false,
+				"git.autofetch": true,
+				"editor.codeActionsOnSave": {
+					"source.fixAll.eslint": true,
+					"source.organizeImports": false
+				},
+				"editor.formatOnSave": true,
+				"files.autoSave": "onFocusChange",
+				"explorer.confirmDragAndDrop": false,
+				"typescript.updateImportsOnFileMove.enabled": "always",
+				"editor.insertSpaces": false,
+				"editor.autoIndent": "none",
+				"editor.detectIndentation": false,
+				"editor.formatOnType": true,
+				"editor.wordWrap": "on",
+				"explorer.incrementalNaming": "smart",
+				"extensions.ignoreRecommendations": false,
+				"eslint.alwaysShowStatus": true,
+				"eslint.packageManager": "yarn",
+				"javascript.updateImportsOnFileMove.enabled": "always",
+				"typescript.preferences.importModuleSpecifier": "relative",
+				"editor.renderWhitespace": "all",
+				"editor.linkedEditing": true,
+				"breadcrumbs.enabled": true,
+				"files.associations": {
+					"*.json": "jsonc",
+					"data": "sql"
+				},
+				"terminal.integrated.shellIntegration.enabled": true,
+				"json.format.keepLines": true,
+				"auto-rename-tag.activationOnLanguage": [ "html", "xml", "php", "typescriptreact" ],
+				"markdown-pdf.mermaidServer": "https://dfactory01.gitee.io/dns/mermaid.min.js",
+				"vsintellicode.modify.editor.suggestSelection": "disabled"
+			}
+		}
+	}
+}

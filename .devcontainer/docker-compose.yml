@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  01factory-app:
+    stdin_open: true
+    image: dev/web
+    env_file:
+      - .env
+    volumes:
+      - ~/data:/data
+      - ~/.ssh:/root/.ssh
+      - ~/.local/share/pnpm:/root/.local/share/pnpm
+      - ~/.pnpm-store/v3:/.pnpm-store/v3
+      - ~/.vscode/tasks:/tasks
+    build:
+      context: ..
+      dockerfile: .devcontainer/web
+
+  db:
+    image: dev/db
+    build:
+      context: ..
+      dockerfile: .devcontainer/db
+
+  nginx:
+    image: dfactory01-docker.pkg.coding.net/01factory/release/nginx:latest
+    environment:
+      - NGINX_PORT=3456
+    ports:
+      - 3456:3456
+    links:
+      - 01factory-web:webserver
+
+  docode:
+    image: dfactory01-docker.pkg.coding.net/01factory/release/doccode:latest
+
+  adminer:
+    image: dfactory01-docker.pkg.coding.net/01factory/core/adminer:latest
+
+  minio:
+    image: dfactory01-docker.pkg.coding.net/01factory/core/minio:latest
+
+  fileview:
+    image: dfactory01-docker.pkg.coding.net/01factory/core/fileview:latest
+    links:
+      - 01factory-web:webserver
