@@ -10,6 +10,7 @@
 		"vscode": {
 			"extensions": [
 				"mm.mmstudio",
+				"eamodio.gitlens",
 				"analytic-signal.preview-pdf"
 			],
 			"settings": {
