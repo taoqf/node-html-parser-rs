@@ -9,7 +9,7 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"Souche.vscode-mindmap",
+				"season-studio.felis-mindmap",
 				"mm.mmstudio",
 				"eamodio.gitlens",
 				"analytic-signal.preview-pdf"
