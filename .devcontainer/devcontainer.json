@@ -9,6 +9,7 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"eightHundreds.vscode-mindmap",
 				"season-studio.felis-mindmap",
 				"mm.mmstudio",
 				"eamodio.gitlens",
