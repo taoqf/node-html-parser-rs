@@ -16,6 +16,7 @@
 				"analytic-signal.preview-pdf"
 			],
 			"settings": {
+				"editor.suggestSelection": "recentlyUsedByPrefix",
 				"git.enableSmartCommit": true,
 				"files.eol": "\n",
 				"explorer.confirmDelete": false,
