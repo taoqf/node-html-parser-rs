@@ -52,7 +52,8 @@
 				"json.format.keepLines": true,
 				"auto-rename-tag.activationOnLanguage": [ "html", "xml", "php", "typescriptreact" ],
 				"markdown-pdf.mermaidServer": "https://dfactory01.gitee.io/dns/mermaid.min.js",
-				"vsintellicode.modify.editor.suggestSelection": "disabled"
+				"vsintellicode.modify.editor.suggestSelection": "disabled",
+				"editor.inlineSuggest.suppressSuggestions": true
 			}
 		}
 	}
