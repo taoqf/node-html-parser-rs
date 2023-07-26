@@ -3,7 +3,7 @@ version: '3.8'
 services:
   01factory-app:
     stdin_open: true
-    image: dev/web
+    image: dev/app
     env_file:
       - .env
     volumes:
@@ -14,7 +14,7 @@ services:
       - ~/.vscode/tasks:/tasks
     build:
       context: ..
-      dockerfile: .devcontainer/web
+      dockerfile: .devcontainer/app
 
   db:
     image: dev/db
