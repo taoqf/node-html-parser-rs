@@ -1,22 +1,11 @@
 FROM dfactory01-docker.pkg.coding.net/01factory/release/web:dev
 
-# WORKDIR /
-# ADD 01factory.tar.gz /
-
 WORKDIR /01factory
 
 ADD . .
-
-# RUN git config --global --add safe.directory /01factory
-# RUN git init
-# RUN git checkout -B main
-# RUN git add .
-# RUN git config --global user.email "dev@example.com"
-# RUN git config --global user.name "dev"
-# RUN git commit -m 'init'
 
 EXPOSE 3000
 
 ENV PORT 3000
 
-# ENTRYPOINT pnpm dev
+ENTRYPOINT pnpm dev
