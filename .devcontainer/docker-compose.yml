@@ -9,8 +9,6 @@ services:
     volumes:
       - ~/data:/data
       - ~/.ssh:/root/.ssh
-      - ~/.local/share/pnpm:/root/.local/share/pnpm
-      - ~/.pnpm-store/v3:/.pnpm-store/v3
       - ~/.vscode/tasks:/tasks
     build:
       context: ..
