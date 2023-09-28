@@ -10,6 +10,7 @@ services:
       - ~/data:/data
       - ~/.ssh:/root/.ssh
       - ~/.vscode/tasks:/tasks
+      - ~/exts:/exts
     build:
       context: ..
       dockerfile: .devcontainer/app
