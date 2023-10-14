@@ -4,6 +4,8 @@ WORKDIR /01factory
 
 ADD . .
 
+RUN pnpm i
+
 EXPOSE 3000
 
 ENV PORT 3000
