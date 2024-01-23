@@ -8,6 +8,7 @@ services:
       - .env
     volumes:
       - ~/data:/data
+      - ~/.ssh:/root/.ssh
       - ~/.vscode/tasks:/tasks
       - ~/exts:/exts
     build:
