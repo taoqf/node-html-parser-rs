@@ -32,10 +32,10 @@ services:
     image: dfactory01-docker.pkg.coding.net/01factory/release/doccode:latest
 
   adminer:
-    image: dfactory01-docker.pkg.coding.net/01factory/core/adminer:latest
+    image: dfactory01-docker.pkg.coding.net/01factory/release/adminer:latest
 
   minio:
-    image: dfactory01-docker.pkg.coding.net/01factory/core/minio:latest
+    image: dfactory01-docker.pkg.coding.net/01factory/release/minio:latest
 
   fileview:
-    image: dfactory01-docker.pkg.coding.net/01factory/core/fileview:latest
+    image: dfactory01-docker.pkg.coding.net/01factory/release/fileview:latest
