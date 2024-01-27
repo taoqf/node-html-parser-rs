@@ -3,7 +3,7 @@
 {
 	"name": "01factory/dev",
 	"dockerComposeFile": "./docker-compose.yml",
-	"service": "01factory-app",
+	"service": "webserver",
 	"workspaceFolder": "/01factory",
 	// "postCreateCommand": "pnpm i --prefer-offline && pnpm dev",
 	"customizations": {

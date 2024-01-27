@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  01factory-app:
+  webserver:
     stdin_open: true
     image: dev/app
     env_file:
@@ -27,8 +27,6 @@ services:
       - NGINX_PORT=3456
     ports:
       - 3456:3456
-    links:
-      - 01factory-web:webserver
 
   doccode:
     image: dfactory01-docker.pkg.coding.net/01factory/release/doccode:latest
@@ -41,5 +39,3 @@ services:
 
   fileview:
     image: dfactory01-docker.pkg.coding.net/01factory/core/fileview:latest
-    links:
-      - 01factory-web:webserver
