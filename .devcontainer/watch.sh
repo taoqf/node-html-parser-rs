@@ -10,5 +10,5 @@ while true; do
     # 检查文件变化
     inotifywait -m -r -e event "$SOURCE_DIR"
     # 如果检测到变化，执行 rsync
-    rsync -avz --delete --exclude ".git" --exclude ".devcontainer" "$SOURCE_DIR" "$REMOTE_DIR"
+    rsync -avz --delete --exclude ".git" --exclude ".devcontainer" --exclude "node_modules" "$SOURCE_DIR" "$REMOTE_DIR"
 done
