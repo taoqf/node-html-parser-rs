@@ -4,10 +4,11 @@ WORKDIR /01factory
 
 ADD . .
 
-RUN pnpm i
+# RUN pnpm i
 
 EXPOSE 3000
 
 ENV PORT 3000
 
 # ENTRYPOINT pnpm dev
+ENTRYPOINT [ "./.devcontainer/watch.sh" ]
