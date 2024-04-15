@@ -11,4 +11,5 @@ EXPOSE 3000
 ENV PORT 3000
 
 # ENTRYPOINT pnpm dev
-ENTRYPOINT [ "./.devcontainer/watch.sh" ]
+# !!! 在Windows上，当前的docker版本会映射错本地路径
+# ENTRYPOINT [ "./.devcontainer/watch.sh" ]
