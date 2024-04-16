@@ -18,6 +18,7 @@
 				"explorer.confirmDelete": false,
 				"git.confirmSync": false,
 				"git.autofetch": true,
+				"editor.formatOnSave": false,
 				"files.autoSave": "onFocusChange",
 				"explorer.confirmDragAndDrop": false,
 				"typescript.updateImportsOnFileMove.enabled": "always",
