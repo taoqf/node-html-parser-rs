@@ -30,7 +30,6 @@
 				"explorer.incrementalNaming": "smart",
 				"extensions.ignoreRecommendations": false,
 				"eslint.alwaysShowStatus": true,
-				"eslint.packageManager": "yarn",
 				"javascript.updateImportsOnFileMove.enabled": "always",
 				"typescript.preferences.importModuleSpecifier": "relative",
 				"editor.renderWhitespace": "all",
