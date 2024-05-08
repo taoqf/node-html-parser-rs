@@ -4,6 +4,5 @@ WORKDIR /01factory
 
 ADD . .
 
-# ENTRYPOINT pnpm dev
 # !!! 在Windows上，当前的docker版本会映射错本地路径
 # ENTRYPOINT [ "./.devcontainer/watch.sh" ]
