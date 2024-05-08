@@ -41,7 +41,6 @@
 				},
 				"terminal.integrated.shellIntegration.enabled": true,
 				"json.format.keepLines": true,
-				"auto-rename-tag.activationOnLanguage": [ "html", "xml", "php", "typescriptreact" ],
 				"markdown-pdf.mermaidServer": "https://cdn.staticfile.net/mermaid/9.4.0/mermaid.min.js",
 				"vsintellicode.modify.editor.suggestSelection": "disabled",
 				"editor.inlineSuggest.suppressSuggestions": true
