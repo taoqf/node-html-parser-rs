@@ -107,27 +107,111 @@
                                             "id": "d191likqlrc0",
                                             "created": 1715656855192,
                                             "text": "表名",
-                                            "note": "小写英文+数字组成。多个单词使用`_`分隔。如`search_data`。"
+                                            "note": null
                                         },
-                                        "children": []
+                                        "children": [
+                                            {
+                                                "data": {
+                                                    "id": "d1fvdsaeqfk0",
+                                                    "created": 1716350242460,
+                                                    "text": "非数据字典表",
+                                                    "note": "小写英文+数字组成。多个单词使用`_`分隔。如`search_data`。\n使用`tb`作为前缀"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d1fvdvihez40",
+                                                    "created": 1716350249478,
+                                                    "text": "数据字典表",
+                                                    "note": "小写英文+数字组成。多个单词使用`_`分隔。如`search_data`。\n表名以`tdict_`作为前缀。"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d1fylc6cn1c0",
+                                                    "created": 1716359297629,
+                                                    "text": "关联表",
+                                                    "note": "表名应体现被关联表表名称\n表名以`tbrel_`作为前缀\n\n```mermaid\nclass map_goods_types~商品分类关联表~{\n\tgoods_id~商品编号~key\n\tgoods_type_code~商品分类编号~key\n}\n```"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
                                     },
                                     {
                                         "data": {
                                             "id": "d191lq8fty80",
                                             "created": 1715656871863,
                                             "text": "字段名",
-                                            "note": "小写英文+数字组成。多个单词使用`_`分隔。如`search_data`。"
+                                            "note": null
                                         },
-                                        "children": []
+                                        "children": [
+                                            {
+                                                "data": {
+                                                    "id": "d1fz8zeg1k00",
+                                                    "created": 1716361150560,
+                                                    "text": "常规字段名",
+                                                    "note": "小写英文+数字组成。多个单词使用`_`分隔。如`search_data`。"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d1fvei1wrzk0",
+                                                    "created": 1716350298542,
+                                                    "text": "是否有效字段",
+                                                    "note": "标识该数据是否有效，字段名固定为`is_active`，类型固定为`bit`，注释固定为`是否有效`，示例：\n\n```mermaid\nclass xxx~xxx~{\n\tbit is_active~是否有效~\n}\n```"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d1fvfrfabrk0",
+                                                    "created": 1716350397306,
+                                                    "text": "是否删除字段",
+                                                    "note": "一般不需要，与是否有效字段有冲突。"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d1fz9cny1yg0",
+                                                    "created": 1716361179433,
+                                                    "text": "日期类字段",
+                                                    "note": "使用`dt_`作前缀"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
                                     },
                                     {
                                         "data": {
-                                            "id": "d191lusude80",
-                                            "created": 1715656881804,
+                                            "id": "d1fvc1gw8cg0",
+                                            "created": 1716350105715,
                                             "text": "主键",
-                                            "note": "前面加上表主体名字，不同表的id字段名要尽可能不同，示例：\n\n1.  用户表(user)主键：`userid` \n1.  订单表(order)主键：`orderid`\n"
+                                            "expandState": "expand"
                                         },
-                                        "children": []
+                                        "children": [
+                                            {
+                                                "data": {
+                                                    "id": "d191lusude80",
+                                                    "created": 1715656881804,
+                                                    "text": "非数据字典表",
+                                                    "note": "以后缀`_id`结尾\n前面加上表主体名字\n不同表的id字段名要尽可能不同，示例：\n\n1.  用户表(user)主键：`userid` \n1.  订单表(order)主键：`orderid`\n\n"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d1fvcbgy00w0",
+                                                    "created": 1716350127485,
+                                                    "text": "数据字典表",
+                                                    "note": "以后缀`_code`结尾\n前面加上表主体名字\n不同表的code字段名要尽可能不同，示例：\n\n1.  商品类型表(goods_type)主键：`goods_type_code` \n"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
                                     }
                                 ]
                             },
