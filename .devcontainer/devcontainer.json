@@ -44,7 +44,7 @@
 				},
 				"terminal.integrated.shellIntegration.enabled": true,
 				"json.format.keepLines": true,
-				"markdown-pdf.mermaidServer": "https://cdn.staticfile.net/mermaid/9.4.0/mermaid.min.js",
+				"markdown-pdf.mermaidServer": "https://cdn.staticfile.net/mermaid/10.7.0/mermaid.min.js",
 				"vsintellicode.modify.editor.suggestSelection": "disabled",
 				"editor.inlineSuggest.suppressSuggestions": true
 			}
