@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   webserver:
     stdin_open: true
@@ -11,6 +9,7 @@ services:
       - ~/.ssh:/root/.ssh
       - ~/.vscode/tasks:/tasks
       - ~/exts:/exts
+      - ~/.cache:/usr/local/share/.cache
     build:
       context: ..
       dockerfile: .devcontainer/app
