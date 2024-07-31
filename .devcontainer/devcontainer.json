@@ -32,7 +32,6 @@
 				"editor.wordWrap": "on",
 				"explorer.incrementalNaming": "smart",
 				"extensions.ignoreRecommendations": false,
-				"eslint.alwaysShowStatus": true,
 				"javascript.updateImportsOnFileMove.enabled": "always",
 				"typescript.preferences.importModuleSpecifier": "relative",
 				"editor.renderWhitespace": "all",
@@ -45,7 +44,7 @@
 				"terminal.integrated.shellIntegration.enabled": true,
 				"json.format.keepLines": true,
 				"markdown-pdf.mermaidServer": "https://cdn.staticfile.net/mermaid/10.7.0/mermaid.min.js",
-				"vsintellicode.modify.editor.suggestSelection": "disabled",
+				"vsintellicode.modify.editor.suggestSelection": "recentlyUsedByPrefix",
 				"editor.inlineSuggest.suppressSuggestions": true
 			}
 		}
