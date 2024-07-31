@@ -1,40 +1,57 @@
 services:
   webserver:
     stdin_open: true
-    image: dev/app
-    env_file:
-      - .env
+    image: 01factory.io/${APP_ID:-01factory}-web:dev
     volumes:
       - ~/data:/data
       - ~/.ssh:/root/.ssh
       - ~/.vscode/tasks:/tasks
       - ~/exts:/exts
+      - ../:/host
       - ~/.cache:/usr/local/share/.cache
     build:
       context: ..
       dockerfile: .devcontainer/app
 
   db:
-    image: dev/db
-    build:
-      context: ..
-      dockerfile: .devcontainer/db
+    image: dfactory01-docker.pkg.coding.net/01factory/release/postgres:latest
+    environment:
+      - POSTGRES_DB=${DB_NAME:-01factory}
+      - POSTGRES_USER=${DB_USER:-01factory}
+      - POSTGRES_PASSWORD=${DB_PSWD:-01factory}
+    volumes:
+      - ./init.d/01factory.sql:/docker-entrypoint-initdb.d/01factory.sql
 
   nginx:
     image: dfactory01-docker.pkg.coding.net/01factory/release/nginx:latest
     environment:
-      - NGINX_PORT=3456
+      - NGINX_PORT=${NGINX_PORT:-3456}
+      - NGINX_BASEPATH=${NGINX_BASEPATH:-01factory}
+      - TZ=Asia/Shanghai
     ports:
-      - 3456:3456
+      - ${NGINX_PORT:-3456}:${NGINX_PORT:-3456}
+    volumes:
+      - ./nginx.conf:/etc/nginx/templates/default.conf.template
 
   doccode:
     image: dfactory01-docker.pkg.coding.net/01factory/release/doccode:latest
+    environment:
+      - DOCCODE_TB=${DOCCODE_TB:-tb01doccode}
+      - DOCCODE_PORT=${DOCCODE_PORT:-8090}
+      - DOCCODE_DBNAME=${DB_NAME:-01factory}
+      - DOCCODE_DBUSR=${DB_USER:-01factory}
+      - DOCCODE_DBPSW=${DB_PSWD:-01factory}
+      - DOCCODE_DBHOST=${DOCCODE_DBHOST:-db}
+      - DOCCODE_DBPORT=${DOCCODE_DBPORT:-5432}
 
   adminer:
     image: dfactory01-docker.pkg.coding.net/01factory/release/adminer:latest
 
   minio:
     image: dfactory01-docker.pkg.coding.net/01factory/release/minio:latest
+    environment:
+      - MINIO_ROOT_USER=${MINIO_USER:-01factory}
+      - MINIO_ROOT_PASSWORD=${MINIO_PSWD:-01factory}
 
   fileview:
     image: dfactory01-docker.pkg.coding.net/01factory/release/fileview:latest
