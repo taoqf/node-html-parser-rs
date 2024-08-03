@@ -9,10 +9,10 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"bierner.markdown-mermaid",
 				"albymor.increment-selection",
-				"eightHundreds.vscode-mindmap",
+				"bierner.markdown-mermaid",
 				"eamodio.gitlens",
+				"eightHundreds.vscode-mindmap",
 				"hediet.vscode-drawio",
 				"jebbs.plantuml",
 				"nopeslide.vscode-drawio-plugin-mermaid",
