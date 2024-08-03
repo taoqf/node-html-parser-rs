@@ -9,12 +9,16 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"bierner.markdown-mermaid",
 				"albymor.increment-selection",
 				"eightHundreds.vscode-mindmap",
-				"season-studio.felis-mindmap",
-				"AMiner.codegeex",
 				"eamodio.gitlens",
-				"analytic-signal.preview-pdf"
+				"hediet.vscode-drawio",
+				"jebbs.plantuml",
+				"nopeslide.vscode-drawio-plugin-mermaid",
+				"season-studio.felis-mindmap",
+				"vscode-icons-team.vscode-icons",
+				"AMiner.codegeex"
 			],
 			"settings": {
 				"editor.suggestSelection": "recentlyUsedByPrefix",
