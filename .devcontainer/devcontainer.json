@@ -22,6 +22,10 @@
 				"AMiner.codegeex"
 			],
 			"settings": {
+				"workbench.remoteIndicator.showExtensionRecommendations": false,
+				"remote.downloadExtensionsLocally": true,
+				"plantuml.render": "PlantUMLServer",
+				"plantuml.server": "https://www.plantuml.com/plantuml",
 				"editor.suggestSelection": "recentlyUsedByPrefix",
 				"git.enableSmartCommit": true,
 				"files.eol": "\n",
