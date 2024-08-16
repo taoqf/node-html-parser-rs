@@ -27,6 +27,7 @@ services:
     environment:
       - NGINX_PORT=${NGINX_PORT:-3456}
       - NGINX_BASEPATH=${NGINX_BASEPATH:-01factory}
+      - NGINX_DOMAIN=${NGINX_DOMAIN:-localhost}
       - TZ=Asia/Shanghai
     ports:
       - ${NGINX_PORT:-3456}:${NGINX_PORT:-3456}
