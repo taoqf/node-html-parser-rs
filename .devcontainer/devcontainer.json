@@ -11,6 +11,7 @@
 			"extensions": [
 				"albymor.increment-selection",
 				"bierner.markdown-mermaid",
+				"bpruitt-goddard.mermaid-markdown-syntax-highlighting",
 				"eamodio.gitlens",
 				"eightHundreds.vscode-mindmap",
 				"hediet.vscode-drawio",
