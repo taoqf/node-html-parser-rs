@@ -20,8 +20,7 @@
 				"mm.mmstudio",
 				"nopeslide.vscode-drawio-plugin-mermaid",
 				"season-studio.felis-mindmap",
-				"vscode-icons-team.vscode-icons",
-				"AMiner.codegeex"
+				"vscode-icons-team.vscode-icons"
 			],
 			"settings": {
 				"workbench.remoteIndicator.showExtensionRecommendations": false,
