@@ -5,6 +5,7 @@ services:
     volumes:
       - ~/data:/data
       - ~/.ssh:/root/.ssh
+      - ~/.gitconfig:/root/.gitconfig
       - ~/.vscode/tasks:/tasks
       - ~/exts:/exts
       - ../:/host
