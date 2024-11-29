@@ -10,6 +10,7 @@
 		"vscode": {
 			"extensions": [
 				"albymor.increment-selection",
+				"AykutSarac.jsoncrack-vscode",
 				"bierner.markdown-mermaid",
 				"bpruitt-goddard.mermaid-markdown-syntax-highlighting",
 				"eamodio.gitlens",
