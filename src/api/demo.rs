@@ -65,8 +65,10 @@
 // 	_req: HttpRequest,
 // 	data: web::Data<crate::AppState>,
 // ) -> Result<HttpResponse, Error> {
+// type Table = crate::db::postgres::a::A::all;
+// let client = data.pg().await;
 // 	let conn = data.pg().await;
-// 	let rows = crate::db::postgres::a::A::all()
+// 	let rows = Table::all()
 // 		.limit(3)
 // 		.run(&conn)
 // 		.await
