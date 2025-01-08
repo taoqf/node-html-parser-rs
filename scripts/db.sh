@@ -6,8 +6,8 @@ pwd=$(pwd)
 DB_PG=postgres://01factory:01factory@db:5432/01factory
 # DB_MSSQL='server=0.0.0.0;port=1433;database=d01factory;schema=dbo;user id=sa;password=welds!123;TrustServerCertificate=true;'
 
-DIR_PG=${pwd}/src/db/postgres
-DIR_MSSQL=${pwd}/src/db/mssql
+DIR_PG=${pwd}/../src/db/postgres
+DIR_MSSQL=${pwd}/../src/db/mssql
 
 SCHEMA_PG=${DIR_PG}/welds.yaml
 SCHEMA_MSSQL=${DIR_MSSQL}/welds.yaml
