@@ -39,9 +39,11 @@
 
 // #[get("/db")]
 // pub async fn db(
-// 	_req: HttpRequest,
+// req: actix_web::HttpRequest,
+// query: actix_web::web::Query<Query>,
+// data: actix_web::web::Data<crate::AppState>,
 // 	data: web::Data<crate::AppState>,
-// ) -> Result<HttpResponse, Error> {
+// ) -> HttpResponse {
 // 	let conn = data.mssql().await;
 // 	let rows = crate::db::mssql::sys_user::SysUser::all()
 // 		.limit(3)
@@ -55,9 +57,7 @@
 // 	dbg!(t);
 // 	let msg = dt.to_string();
 // 	dbg!(msg);
-// 	Ok(HttpResponse::Ok().json(MyError {
-// 		name: "dbtest".to_string(),
-// 	}))
+// 	return actix_web::HttpResponse::InternalServerError().body(msg);
 // }
 
 // #[get("/db2")]
@@ -73,7 +73,7 @@
 // 		.unwrap();
 // 	let row = rows.first().unwrap();
 // 	dbg!(row);
-// 	Ok(HttpResponse::Ok().json(MyError {
+// 	return HttpResponse::Ok().json(MyError {
 // 		name: "db2test".to_string(),
-// 	}))
+// 	});
 // }
