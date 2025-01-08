@@ -48,6 +48,7 @@ impl AppState {
 }
 
 mod api;
+mod atoms;
 mod db;
 
 // #[tokio::main]
