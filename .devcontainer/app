@@ -1,4 +1,4 @@
-FROM dfactory01-docker.pkg.coding.net/01factory/release/web:dev
+FROM dfactory01-docker.pkg.coding.net/01factory/release/rust:latest
 
 WORKDIR /01factory
 
@@ -6,3 +6,5 @@ ADD . .
 
 # !!! 在Windows上，当前的docker版本会映射错本地路径
 # ENTRYPOINT [ "./.devcontainer/watch.sh" ]
+
+EXPOSE 3000
