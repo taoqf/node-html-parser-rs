@@ -8,7 +8,7 @@
 
 use welds::WeldsModel;
 
-use crate::db::db::{DATETIME, TIMESTAMP};
+use crate::db::tools::{DATETIME, TIMESTAMP};
 #[derive(Debug, WeldsModel)]
 #[welds(schema = "dbo", table = "sysUser")]
 pub struct SysUser {

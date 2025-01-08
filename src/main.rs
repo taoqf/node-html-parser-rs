@@ -47,14 +47,6 @@ impl AppState {
 	}
 }
 
-// #[derive(serde:: Serialize, serde::Deserialize, Debug)]
-// struct DataBases {
-//     name: String,
-//     age: u32,
-//     is_student: bool,
-//     scores: Vec<i32>,
-// }
-
 mod api;
 mod db;
 
