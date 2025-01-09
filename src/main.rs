@@ -67,7 +67,6 @@ async fn start_server() -> std::io::Result<()> {
 			.service(
 				web::scope("/api")
 					.service(api::demo::hello)
-					.service(api::demo::index)
 					.service(api::demo::test_post)
 					.service(api::demo::db)
 					.service(api::demo::db2),
