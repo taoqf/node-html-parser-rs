@@ -5,6 +5,6 @@ pub(crate) type DATETIME = chrono::NaiveDateTime;
 #[allow(dead_code)]
 pub(crate) type DECIMAL = f64;
 #[allow(dead_code)]
-pub(crate) type DECIMALL = f64;
+pub(crate) type DECIMALL = tiberius::numeric::Decimal;
 #[allow(dead_code)]
 pub(crate) type FLOAT = f64;
