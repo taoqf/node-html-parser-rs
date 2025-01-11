@@ -10,3 +10,13 @@ pub(crate) type DECIMALL = tiberius::numeric::Decimal;
 pub(crate) type FLOAT = f64;
 #[allow(dead_code)]
 pub(crate) type NCHAR = String;
+#[allow(dead_code)]
+pub(crate) type CHAR = String;
+#[allow(dead_code)]
+pub(crate) type MONEY = f64;
+#[allow(dead_code)]
+pub(crate) type IMAGE = Vec<u8>;
+#[allow(dead_code)]
+pub(crate) type Uuid = String;
+#[allow(dead_code)]
+pub(crate) type SYSNAME = String;
