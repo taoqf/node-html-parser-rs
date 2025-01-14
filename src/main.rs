@@ -1,79 +1,25 @@
-use actix_web::{self, web, App, HttpServer};
-
-#[derive(Clone)]
-pub(crate) struct AppState {
-	pool_size: u32,
-	url_db_pg: String,
-	url_db_mssql: String,
-}
-
-impl AppState {
-	pub(crate) fn new() -> Self {
-		let pool_size: u32 = std::env::var("DB_POOL").unwrap().parse().unwrap();
-		let url_db_pg = std::env::var("DB_PG").unwrap();
-		log::debug!("url_db_pg={}", url_db_pg);
-		let url_db_mssql = std::env::var("DB_MSSQL").unwrap();
-		log::debug!("url_db_mssql={}", url_db_mssql);
-		return Self {
-			pool_size,
-			url_db_mssql,
-			url_db_pg,
-		};
-	}
-}
-impl AppState {
-	pub(crate) async fn pg(&self) -> welds::connections::postgres::PostgresClient {
-		let url_db = &self.url_db_pg;
-		let pool = sqlx::postgres::PgPoolOptions::new()
-			.max_connections(self.pool_size)
-			.connect(url_db)
-			.await
-			.unwrap();
-		let client: welds::connections::postgres::PostgresClient = pool.into();
-		return client;
-	}
-}
-impl AppState {
-	pub(crate) async fn mssql(&self) -> welds::connections::mssql::MssqlClient {
-		let url_db = &self.url_db_mssql;
-		let mgr = bb8_tiberius::ConnectionManager::build(url_db.as_str()).unwrap();
-		let pool = bb8::Pool::builder()
-			.max_size(self.pool_size)
-			.build(mgr)
-			.await
-			.unwrap();
-		let client: welds::connections::mssql::MssqlClient = pool.into();
-		return client;
-	}
-}
-
 mod api;
+mod app_state;
 mod atoms;
 mod db;
 
-// #[tokio::main]
-// async fn main() {
-fn main() {
+#[tokio::main(flavor = "multi_thread", worker_threads = 12)]
+async fn main() {
 	log4rs::init_file("./log4rs.yaml", Default::default()).expect("log4rs config not correct!");
 	dotenvy::dotenv().unwrap();
-	start_server().unwrap();
-}
+	let shared_state = std::sync::Arc::new(app_state::AppState::new().await);
+	let app = axum::Router::new()
+		.nest(
+			"/api",
+			axum::Router::new()
+				.route("/", axum::routing::get(api::demo::hello))
+				.route("/test-post", axum::routing::post(api::demo::test_post))
+				.route("/test-post2", axum::routing::post(api::demo::test_post2))
+				.route("/db1", axum::routing::post(api::demo::db))
+				.route("/db2", axum::routing::post(api::demo::db2)),
+		)
+		.with_state(shared_state);
 
-#[actix_web::main]
-async fn start_server() -> std::io::Result<()> {
-	HttpServer::new(move || {
-		App::new()
-			.app_data(web::Data::new(AppState::new()))
-			.service(
-				web::scope("/api")
-					.service(api::demo::hello)
-					.service(api::demo::test_post)
-					.service(api::demo::db)
-					.service(api::demo::db2),
-			)
-	})
-	// .workers(12)
-	.bind(("0.0.0.0", 3000))?
-	.run()
-	.await
+	let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+	axum::serve(listener, app).await.unwrap();
 }
