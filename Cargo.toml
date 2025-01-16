@@ -43,11 +43,11 @@ features = ["chrono", "runtime-async-std", "rust_decimal"]
 
 [dependencies.welds]
 version = "0.4.10"
-features = ["mssql", "postgres"]
+features = ["mssql", "postgres", "mysql"]
 
 [dependencies.welds-connections]
 version = "0.4.10"
-features = ["mssql", "mssql-rust_decimal"]
+features = ["mssql", "mssql-rust_decimal", "postgres", "mysql"]
 
 [dependencies.uuid]
 version = "1.11.0"
