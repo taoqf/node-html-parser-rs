@@ -4,6 +4,7 @@ pub(crate) struct AppState {
 	pub appsecret: String,
 	pub pg: welds::connections::postgres::PostgresClient,
 	pub mssql: welds::connections::mssql::MssqlClient,
+	pub mysql: welds::connections::mysql::MysqlClient,
 }
 
 impl AppState {
@@ -17,11 +18,13 @@ impl AppState {
 
 		let pg = get_pg("DB_PG", pool_size).await;
 		let mssql = get_mssql("DB_MSSQL", pool_size).await;
+		let mysql = get_mysql("DB_MYSQL", pool_size).await;
 		return Self {
 			appid,
 			appsecret,
 			pg,
 			mssql,
+			mysql,
 		};
 	}
 }
