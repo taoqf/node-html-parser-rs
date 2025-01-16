@@ -50,3 +50,11 @@ async fn get_mssql(env_key: &str, pool_size: u32) -> welds::connections::mssql::
 	let client: welds::connections::mssql::MssqlClient = pool.into();
 	return client;
 }
+
+async fn get_mysql(env_key: &str, _pool_size: u32) -> welds::connections::mysql::MysqlClient {
+	let url_db = std::env::var(env_key).unwrap();
+	log::debug!("DB_URL={}", url_db);
+	let pool = sqlx::MySqlPool::connect(&url_db).await.unwrap();
+	let client: welds::connections::mysql::MysqlClient = pool.into();
+	return client;
+}
