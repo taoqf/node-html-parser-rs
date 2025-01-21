@@ -20,3 +20,5 @@ pub(crate) type IMAGE = Vec<u8>;
 pub(crate) type Uuid = String;
 #[allow(dead_code)]
 pub(crate) type SYSNAME = String;
+#[allow(dead_code)]
+pub(crate) type NUMERIC = tiberius::numeric::Decimal;

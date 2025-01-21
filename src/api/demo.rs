@@ -1,8 +1,46 @@
-use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use serde_json::json;
 
-#[get("/")]
-pub async fn hello() -> impl Responder {
-	HttpResponse::Ok().body("Hello world!")
+#[actix_web::get("/")]
+pub async fn hello() -> &'static str {
+	let url = format!("http://127.0.0.1:3000/api/{}", "erp");
+	let client = reqwest::Client::new();
+
+	#[derive(Debug, serde::Serialize, serde::Deserialize)]
+	pub(crate) struct Reply {
+		#[serde(rename = "RequestStatus")]
+		pub(crate) request_status: String,
+		#[serde(rename = "RequestStatusCode")]
+		pub(crate) request_status_code: u32,
+		#[serde(rename = "ReplyMode")]
+		pub(crate) reply_mode: u32, // ReplyModeEnum
+		// pub(crate) reply_mode: ReplyModeEnum,
+		#[serde(rename = "ReplyAlertMessage")]
+		pub(crate) reply_alert_message: String,
+		#[serde(rename = "ReplyContent")]
+		pub(crate) reply_content: String,
+		pub(crate) error: String,
+		#[serde(rename = "errorCode")]
+		pub(crate) error_code: u32,
+		#[serde(rename = "errorMessage")]
+		pub(crate) error_message: String,
+		pub(crate) msgcode: u32,
+		pub(crate) message: String,
+	}
+
+	let data = client
+		.post(url)
+		.json(&json!({
+			"foo": "bar",
+		}))
+		.send()
+		.await
+		.unwrap()
+		.json::<Reply>()
+		.await
+		.unwrap();
+
+	log::debug!("{:?}", data);
+	return "Hello world!";
 }
 
 #[tokio::test]
@@ -17,27 +55,28 @@ async fn test_hello_api() {
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
-struct Param {
+pub struct Param {
 	data: u32,
 }
 
-#[derive(serde::Deserialize, serde::Serialize)]
-struct Data {
+#[actix_web::post("/test/")]
+pub async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpResponse {
+	log::debug!("param = {}", data.data);
+	return actix_web::HttpResponse::Ok().json(json!({
+		"data": 100,
+		"msg": "ok".to_owned(),
+	}));
+}
+
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+pub struct Data {
 	data: u32,
 	msg: String,
 }
 
-#[post("/")]
-pub async fn test_post(param: web::Json<Param>) -> HttpResponse {
-	log::debug!("param = {}", param.data);
-	HttpResponse::Ok().json(Data {
-		data: 100,
-		msg: "ok".to_owned(),
-	})
-}
-
-#[tokio::test]
-async fn test_post_api() {
+#[actix_web::post("/test2/")]
+pub async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResponse {
+	log::debug!("param = {:#?}", data);
 	let client = reqwest::Client::new();
 	let res = client
 		.post("http://127.0.0.1:3000/api/")
@@ -50,29 +89,27 @@ async fn test_post_api() {
 		.unwrap();
 	assert_eq!(res.data, 100);
 	assert_eq!(res.msg, "ok");
+	return actix_web::HttpResponse::Ok().json(Data {
+		data: 100,
+		msg: data.msg.clone(),
+	});
 }
 
-#[derive(serde::Serialize)]
-struct MyError {
-	name: String,
+#[derive(Debug, serde::Deserialize)]
+pub struct Query {
+	data: u32,
+	msg: String,
 }
 
-#[derive(serde::Deserialize)]
-struct Info {
-	name: String,
-}
-
-#[derive(serde::Deserialize)]
-struct Query {
-	_name: String,
-}
-
-#[get("/db")]
+#[actix_web::get("/db")]
 pub async fn db(
 	_req: actix_web::HttpRequest,
-	_query: actix_web::web::Query<Query>,
+	query: actix_web::web::Query<Query>,
 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
-) -> HttpResponse {
+) -> String {
+	log::debug!("param = {:#?}", query);
+	log::debug!("data = {}", query.data);
+	log::debug!("msg = {}", query.msg);
 	let client = &state.mssql;
 	let rows = crate::db::mssql::sys_user::SysUser::all()
 		.limit(3)
@@ -85,22 +122,23 @@ pub async fn db(
 	let t = ab.and_utc().timestamp();
 	dbg!(t);
 	let msg = dt.to_string();
-	return actix_web::HttpResponse::InternalServerError().body(msg);
+	return msg;
 }
 
-#[get("/db2")]
+#[actix_web::get("/db2")]
 pub async fn db2(
-	_req: HttpRequest,
+	_req: actix_web::HttpRequest,
 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
-) -> HttpResponse {
+) -> actix_web::HttpResponse {
 	type Table = crate::db::postgres::a::A;
 	let client = &state.pg;
 	let rows = Table::all().limit(3).run(client).await.unwrap();
 	let row = rows.first().unwrap();
 	dbg!(row);
-	return HttpResponse::Ok().json(MyError {
-		name: "db2test".to_string(),
-	});
+
+	return actix_web::HttpResponse::Ok().json(serde_json::json!({
+		"foo": "bar"
+	}));
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -109,11 +147,11 @@ struct ReturnResult {
 	bar: i32,
 }
 
-#[get("/db3")]
+#[actix_web::get("/db3")]
 pub async fn db3(
-	_req: HttpRequest,
+	_req: actix_web::HttpRequest,
 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
-) -> HttpResponse {
+) -> actix_web::HttpResponse {
 	let mut client = state.mssql().await;
 	let stream = client
 		.query("SELECT @P1 as foo, @P2 as bar", &[&1i32, &2i32])
@@ -139,7 +177,7 @@ pub async fn db3(
 		)
 		.await
 		.unwrap();
-	return HttpResponse::Ok().json(MyError {
-		name: "db3test".to_string(),
-	});
+	return actix_web::HttpResponse::Ok().json(serde_json::json!({
+		"foo": "bar"
+	}));
 }
