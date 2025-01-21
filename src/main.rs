@@ -14,9 +14,7 @@ async fn main() {
 			.service(
 				actix_web::web::scope("/api")
 					.service(api::demo::hello)
-					.service(api::demo::test_post)
-					.service(api::demo::db)
-					.service(api::demo::db2),
+					.service(api::demo::test_post),
 			)
 	})
 	// .workers(12)
