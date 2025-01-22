@@ -22,3 +22,10 @@ pub(crate) type Uuid = String;
 pub(crate) type SYSNAME = String;
 #[allow(dead_code)]
 pub(crate) type NUMERIC = tiberius::numeric::Decimal;
+#[allow(dead_code)]
+#[derive(Debug, serde::Serialize)]
+pub(crate) struct Result {
+	ok: bool,
+	message: Option<String>,
+	data: Option<serde_json::Value>,
+}
