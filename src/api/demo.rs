@@ -1,29 +1,7 @@
 use serde_json::json;
 
-#[actix_web::get("/")]
+#[ntex::web::get("/actix")]
 pub async fn hello() -> &'static str {
-	let url = format!("http://127.0.0.1:3000/api/{}?data=123", "test");
-	let client = reqwest::Client::new();
-
-	#[derive(Debug, serde::Serialize, serde::Deserialize)]
-	pub(crate) struct Reply {
-		pub(crate) data: u32,
-		pub(crate) msg: String,
-	}
-
-	let data = client
-		.get(url)
-		// .json(&json!({
-		// 	"foo": "bar",
-		// }))
-		.send()
-		.await
-		.unwrap()
-		.json::<Reply>()
-		.await
-		.unwrap();
-
-	log::debug!("{:?}", data);
 	return "Hello world!";
 }
 
@@ -43,10 +21,10 @@ pub struct Param {
 	data: u32,
 }
 
-#[actix_web::get("/test")]
-pub async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpResponse {
+#[ntex::web::get("/test")]
+pub async fn test_post(data: ntex::web::types::Query<Param>) -> ntex::web::HttpResponse {
 	log::debug!("param = {}", data.data);
-	return actix_web::HttpResponse::Ok().json(json!({
+	return ntex::web::HttpResponse::Ok().json(&json!({
 		"data": 100,
 		"msg": "ok".to_owned(),
 	}));
@@ -58,8 +36,8 @@ pub struct Data {
 	msg: String,
 }
 
-#[actix_web::post("/test2/")]
-pub async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResponse {
+#[ntex::web::post("/test2/")]
+pub async fn test_post2(data: ntex::web::types::Json<Data>) -> ntex::web::HttpResponse {
 	log::debug!("param = {:#?}", data);
 	let client = reqwest::Client::new();
 	let res = client
@@ -73,7 +51,7 @@ pub async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResp
 		.unwrap();
 	assert_eq!(res.data, 100);
 	assert_eq!(res.msg, "ok");
-	return actix_web::HttpResponse::Ok().json(Data {
+	return ntex::web::HttpResponse::Ok().json(&Data {
 		data: 100,
 		msg: data.msg.clone(),
 	});
@@ -85,11 +63,11 @@ pub async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResp
 // 	msg: String,
 // }
 
-// #[actix_web::get("/db")]
+// #[ntex::web::get("/db")]
 // pub async fn db(
-// 	_req: actix_web::HttpRequest,
-// 	query: actix_web::web::Query<Query>,
-// 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
+// 	_req: ntex::web::HttpRequest,
+// 	query: ntex::web::types::Query<Query>,
+// 	state: ntex::web::types::State<std::sync::Arc<crate::app_state::AppState>>,
 // ) -> String {
 // 	log::debug!("param = {:#?}", query);
 // 	log::debug!("data = {}", query.data);
@@ -109,18 +87,18 @@ pub async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResp
 // 	return msg;
 // }
 
-#[actix_web::get("/db2")]
+#[ntex::web::get("/db2")]
 pub async fn db2(
-	_req: actix_web::HttpRequest,
-	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
-) -> actix_web::HttpResponse {
+	_req: ntex::web::HttpRequest,
+	state: ntex::web::types::State<std::sync::Arc<crate::app_state::AppState>>,
+) -> ntex::web::HttpResponse {
 	type Table = crate::db::postgres::a::A;
 	let client = &state.pg;
 	let rows = Table::all().limit(3).run(client).await.unwrap();
 	let row = rows.first().unwrap();
 	dbg!(row);
 
-	return actix_web::HttpResponse::Ok().json(serde_json::json!({
+	return ntex::web::HttpResponse::Ok().json(&serde_json::json!({
 		"foo": "bar"
 	}));
 }
@@ -131,11 +109,11 @@ pub async fn db2(
 // 	bar: i32,
 // }
 
-// #[actix_web::get("/db3")]
+// #[ntex::web::get("/db3")]
 // pub async fn db3(
-// 	_req: actix_web::HttpRequest,
-// 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
-// ) -> actix_web::HttpResponse {
+// 	_req: ntex::web::HttpRequest,
+// 	state: ntex::web::types::State<std::sync::Arc<crate::app_state::AppState>>,
+// ) -> ntex::web::HttpResponse {
 // 	let mut client = state.mssql().await;
 // 	let stream = client
 // 		.query("SELECT @P1 as foo, @P2 as bar", &[&1i32, &2i32])
@@ -161,7 +139,7 @@ pub async fn db2(
 // 		)
 // 		.await
 // 		.unwrap();
-// 	return actix_web::HttpResponse::Ok().json(serde_json::json!({
+// 	return ntex::web::HttpResponse::Ok().json(&serde_json::json!({
 // 		"foo": "bar"
 // 	}));
 // }
