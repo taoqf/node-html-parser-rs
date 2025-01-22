@@ -52,7 +52,7 @@ impl Result {
 impl Result {
 	#[allow(dead_code)]
 	pub(crate) fn res_ok(data: serde_json::Value) -> actix_web::HttpResponse {
-		actix_web::HttpResponse::Ok().json(Self {
+		actix_web::HttpResponse::Ok().json(&Self {
 			ok: true,
 			message: None,
 			data: Some(data),
@@ -60,7 +60,7 @@ impl Result {
 	}
 	#[allow(dead_code)]
 	pub(crate) fn res_err(msg: &str) -> actix_web::HttpResponse {
-		actix_web::HttpResponse::Ok().json(Self {
+		actix_web::HttpResponse::Ok().json(&Self {
 			ok: false,
 			message: Some(msg.to_owned()),
 			data: None,
