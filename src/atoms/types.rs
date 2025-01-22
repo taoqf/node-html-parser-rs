@@ -29,3 +29,22 @@ pub(crate) struct Result {
 	message: Option<String>,
 	data: Option<serde_json::Value>,
 }
+
+impl Result {
+	#[allow(dead_code)]
+	pub(crate) fn ok(data: serde_json::Value) -> Self {
+		Self {
+			ok: true,
+			message: None,
+			data: Some(data),
+		}
+	}
+	#[allow(dead_code)]
+	pub(crate) fn err(msg: &str) -> Self {
+		Self {
+			ok: true,
+			message: Some(msg.to_owned()),
+			data: None,
+		}
+	}
+}
