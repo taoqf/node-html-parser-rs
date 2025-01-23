@@ -25,9 +25,24 @@ pub(crate) type NUMERIC = tiberius::numeric::Decimal;
 #[allow(dead_code)]
 #[derive(Debug, serde::Serialize)]
 pub(crate) struct Result {
-	ok: bool,
+	pub ok: bool,
 	message: Option<String>,
 	data: Option<serde_json::Value>,
+}
+
+impl Result {
+	#[allow(dead_code)]
+	pub(crate) fn message(&self) -> &str {
+		assert!(self.ok == false);
+		assert!(self.message.is_some());
+		return self.message.as_ref().unwrap();
+	}
+	#[allow(dead_code)]
+	pub(crate) fn data(&self) -> &serde_json::Value {
+		assert!(self.ok == true);
+		assert!(self.data.is_some());
+		return self.data.as_ref().unwrap();
+	}
 }
 
 impl Result {
