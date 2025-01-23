@@ -23,7 +23,7 @@ pub(crate) type SYSNAME = String;
 #[allow(dead_code)]
 pub(crate) type NUMERIC = tiberius::numeric::Decimal;
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub(crate) struct Result {
 	pub ok: bool,
 	message: Option<String>,
