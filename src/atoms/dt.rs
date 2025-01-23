@@ -33,11 +33,14 @@ pub(crate) enum DtType {
  * 将时间戳转换为时间字符串
  */
 #[allow(dead_code)]
-pub(crate) fn dt2str(dt: chrono::NaiveDateTime, dt_type: DtType) -> String {
-	match dt_type {
-		DtType::DATE => return dt.format("%Y-%m-%d").to_string(),
-		DtType::TIME => return dt.format("%H:%M:%S").to_string(),
-		DtType::DATETIME => return dt.format("%Y-%m-%d %H:%M:%S").to_string(),
+pub(crate) fn dt2str(dt: &Option<chrono::NaiveDateTime>, dt_type: DtType) -> String {
+	match dt {
+		None => return "".to_string(),
+		Some(dt) => match dt_type {
+			DtType::DATE => return dt.format("%Y-%m-%d").to_string(),
+			DtType::TIME => return dt.format("%H:%M:%S").to_string(),
+			DtType::DATETIME => return dt.format("%Y-%m-%d %H:%M:%S").to_string(),
+		},
 	}
 }
 
