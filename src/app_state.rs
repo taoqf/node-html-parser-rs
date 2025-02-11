@@ -15,55 +15,35 @@ impl AppState {
 		let appsecret = std::env::var("WX_APPSECRET").unwrap();
 		log::debug!("appsecret={}", appsecret);
 
-		let pool_size: u32 = std::env::var("DB_POOL").unwrap().parse().unwrap();
-
-		let pg = get_pg("DB_PG", pool_size).await;
-		// let mssql = get_mssql("DB_MSSQL", pool_size).await;
-		// let mysql = get_mysql("DB_MYSQL", pool_size).await;
-		// let mssql2 = get_mssql2("DB_MSSQL2", pool_size).await;
+		let pg = get_pg("DB_PG").await;
+		// let mssql = get_mssql("DB_MSSQL").await;
+		// let mysql = get_mysql("DB_MYSQL").await;
 		return Self {
 			appid,
 			appsecret,
 			pg,
 			// mssql,
 			// mysql,
-			// mssql2,
 		};
 	}
 }
 
-// impl AppState {
-// 	pub(crate) async fn mssql(
-// 		&self,
-// 	) -> deadpool_tiberius::deadpool::managed::Object<deadpool_tiberius::Manager> {
-// 		let conn = self.mssql2.get().await.unwrap();
-// 		return conn;
-// 	}
-// }
-
-async fn get_pg(env_key: &str, pool_size: u32) -> welds::connections::postgres::PostgresClient {
+async fn get_pg(env_key: &str) -> welds::connections::postgres::PostgresClient {
 	let url_db = std::env::var(env_key).unwrap();
 	log::debug!("DB_URL={}", url_db);
-	let pool = sqlx::postgres::PgPoolOptions::new()
-		.max_connections(pool_size)
-		.connect(&url_db)
+	let client = welds::connections::postgres::connect(url_db.as_str())
 		.await
 		.unwrap();
-	let client: welds::connections::postgres::PostgresClient = pool.into();
 	return client;
 }
 
 #[allow(dead_code)]
-async fn get_mssql(env_key: &str, pool_size: u32) -> welds::connections::mssql::MssqlClient {
+async fn get_mssql(env_key: &str) -> welds::connections::mssql::MssqlClient {
 	let url_db = std::env::var(env_key).unwrap();
 	log::debug!("DB_URL={}", url_db);
-	let mgr = bb8_tiberius::ConnectionManager::build(url_db.as_str()).unwrap();
-	let pool = bb8::Pool::builder()
-		.max_size(pool_size)
-		.build(mgr)
+	let client = welds::connections::mssql::connect(url_db.as_str())
 		.await
 		.unwrap();
-	let client: welds::connections::mssql::MssqlClient = pool.into();
 	return client;
 }
 
@@ -81,10 +61,11 @@ async fn get_mssql2(env_key: &str, pool_size: u32) -> deadpool_tiberius::Pool {
 }
 
 #[allow(dead_code)]
-async fn get_mysql(env_key: &str, _pool_size: u32) -> welds::connections::mysql::MysqlClient {
+async fn get_mysql(env_key: &str) -> welds::connections::mysql::MysqlClient {
 	let url_db = std::env::var(env_key).unwrap();
 	log::debug!("DB_URL={}", url_db);
-	let pool = sqlx::MySqlPool::connect(&url_db).await.unwrap();
-	let client: welds::connections::mysql::MysqlClient = pool.into();
+	let client = welds::connections::mysql::connect(url_db.as_str())
+		.await
+		.unwrap();
 	return client;
 }
