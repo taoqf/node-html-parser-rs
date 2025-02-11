@@ -949,8 +949,6 @@ name = "dfactory01"
 version = "0.1.0"
 dependencies = [
  "actix-web",
- "bb8",
- "bb8-tiberius",
  "chrono",
  "deadpool-tiberius",
  "dotenvy",
