@@ -30,22 +30,40 @@ pub(crate) enum DtType {
 }
 
 /**
- * 将时间戳转换为时间字符串
+ * 将时间转换为时间字符串
  */
 #[allow(dead_code)]
 pub(crate) fn dt2str(dt: &Option<chrono::NaiveDateTime>, dt_type: DtType) -> String {
 	match dt {
-		None => return "".to_string(),
+		None => "".to_string(),
 		Some(dt) => match dt_type {
-			DtType::DATE => return dt.format("%Y-%m-%d").to_string(),
-			DtType::TIME => return dt.format("%H:%M:%S").to_string(),
-			DtType::DATETIME => return dt.format("%Y-%m-%d %H:%M:%S").to_string(),
+			DtType::DATE => dt.format("%Y-%m-%d").to_string(),
+			DtType::TIME => dt.format("%H:%M:%S").to_string(),
+			DtType::DATETIME => dt.format("%Y-%m-%d %H:%M:%S").to_string(),
 		},
 	}
 }
 
 /**
- * 将时间字符串转换为时间戳
+ * 将mssql查询出来的时间时间转换为时间字符串
+ */
+#[allow(dead_code)]
+pub(crate) fn mssql_dt2str(dt: &Option<chrono::NaiveDateTime>, dt_type: DtType) -> String {
+	match dt {
+		None => "".to_string(),
+		Some(dt) => {
+			let dt = add_time_zone(&dt);
+			match dt_type {
+				DtType::DATE => dt.format("%Y-%m-%d").to_string(),
+				DtType::TIME => dt.format("%H:%M:%S").to_string(),
+				DtType::DATETIME => dt.format("%Y-%m-%d %H:%M:%S").to_string(),
+			}
+		}
+	}
+}
+
+/**
+ * 将时间字符串转换为时间
  */
 #[allow(dead_code)]
 pub(crate) fn str2dt(dt_str: &str) -> chrono::NaiveDateTime {
