@@ -52,3 +52,25 @@ pub(crate) fn str2dt(dt_str: &str) -> chrono::NaiveDateTime {
 	let dt = chrono::NaiveDateTime::from_str(dt_str);
 	return dt.unwrap();
 }
+
+/**
+ * 将mssql查询出来的日期转换为对应时区日期
+ */
+#[allow(dead_code)]
+pub(crate) fn add_time_zone(dt: &chrono::NaiveDateTime) -> chrono::NaiveDateTime {
+	let dt = dt.clone();
+	let offset = 8;
+	let dt = dt + chrono::Duration::hours(offset);
+	return dt;
+}
+
+/**
+ * 将日期参数转换为数据库查询中使用的UTC时间
+ */
+#[allow(dead_code)]
+pub(crate) fn remove_time_zone(dt: &chrono::NaiveDateTime) -> chrono::NaiveDateTime {
+	let dt = dt.clone();
+	let offset = 8;
+	let dt = dt - chrono::Duration::hours(offset);
+	return dt;
+}
