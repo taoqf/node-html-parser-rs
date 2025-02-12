@@ -78,7 +78,7 @@ pub(crate) fn str2dt(dt_str: &str) -> chrono::NaiveDateTime {
 pub(crate) fn add_time_zone(dt: &chrono::NaiveDateTime) -> chrono::NaiveDateTime {
 	let dt = dt.clone();
 	let offset = 8;
-	let dt = dt + chrono::Duration::hours(offset);
+	let dt = dt - chrono::Duration::hours(offset);
 	return dt;
 }
 
