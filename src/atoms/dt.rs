@@ -45,24 +45,6 @@ pub(crate) fn dt2str(dt: &Option<chrono::NaiveDateTime>, dt_type: DtType) -> Str
 }
 
 /**
- * 将mssql查询出来的时间时间转换为时间字符串
- */
-#[allow(dead_code)]
-pub(crate) fn mssql_dt2str(dt: &Option<chrono::NaiveDateTime>, dt_type: DtType) -> String {
-	match dt {
-		None => "".to_string(),
-		Some(dt) => {
-			let dt = add_time_zone(&dt);
-			match dt_type {
-				DtType::DATE => dt.format("%Y-%m-%d").to_string(),
-				DtType::TIME => dt.format("%H:%M:%S").to_string(),
-				DtType::DATETIME => dt.format("%Y-%m-%d %H:%M:%S").to_string(),
-			}
-		}
-	}
-}
-
-/**
  * 将时间字符串转换为时间
  */
 #[allow(dead_code)]
