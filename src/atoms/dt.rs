@@ -74,3 +74,21 @@ pub(crate) fn remove_time_zone(dt: &chrono::NaiveDateTime) -> chrono::NaiveDateT
 	let dt = dt - chrono::Duration::hours(offset);
 	return dt;
 }
+
+#[test]
+fn test_add_time_zone() {
+	let dt =
+		chrono::NaiveDateTime::parse_from_str("2025-02-12 00:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+	let dt = add_time_zone(&dt);
+	let dt_str = dt2str(&Some(dt), DtType::DATETIME);
+	assert_eq!(dt_str, "2025-02-12 08:00:00");
+}
+
+#[test]
+fn test_remove_time_zone() {
+	let dt =
+		chrono::NaiveDateTime::parse_from_str("2025-02-12 08:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+	let dt = remove_time_zone(&dt);
+	let dt_str = dt2str(&Some(dt), DtType::DATETIME);
+	assert_eq!(dt_str, "2025-02-12 00:00:00");
+}
