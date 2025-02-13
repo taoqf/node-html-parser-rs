@@ -13,6 +13,39 @@ pub(crate) fn now() -> DATETIME {
 }
 
 /**
+ * 获取当前时间 yyyy-mm-dd hh:mm:ss
+ */
+#[allow(dead_code)]
+pub(crate) fn now_str() -> String {
+	let now = chrono::Local::now();
+	let now = now.naive_local();
+	let now = dt2str(&Some(now), DtType::DATETIME);
+	return now;
+}
+
+/**
+ * 获取当前时间 yyyy-mm-dd
+ */
+#[allow(dead_code)]
+pub(crate) fn now_str_dt() -> String {
+	let now = chrono::Local::now();
+	let now = now.naive_local();
+	let now = dt2str(&Some(now), DtType::DATE);
+	return now;
+}
+
+/**
+ * 获取当前时间 hh:mm:ss
+ */
+#[allow(dead_code)]
+pub(crate) fn now_str_tm() -> String {
+	let now = chrono::Local::now();
+	let now = now.naive_local();
+	let now = dt2str(&Some(now), DtType::TIME);
+	return now;
+}
+
+/**
  * 获取当前时间时间戳
  */
 #[allow(dead_code)]
