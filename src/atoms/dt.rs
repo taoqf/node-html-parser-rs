@@ -51,7 +51,7 @@ pub(crate) fn now_str_tm() -> String {
 #[allow(dead_code)]
 pub(crate) fn now_stamp() -> i64 {
 	let now = chrono::Utc::now();
-	let now = now.timestamp();
+	let now = now.timestamp_millis();
 	return now;
 }
 
