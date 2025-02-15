@@ -49,10 +49,10 @@ pub(crate) fn now_str_tm() -> String {
  * 获取当前时间时间戳
  */
 #[allow(dead_code)]
-pub(crate) fn now_stamp() -> i64 {
+pub(crate) fn now_stamp() -> u64 {
 	let now = chrono::Utc::now();
 	let now = now.timestamp_millis();
-	return now;
+	return now as u64;
 }
 
 #[allow(dead_code)]
