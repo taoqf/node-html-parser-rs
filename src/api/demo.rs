@@ -114,7 +114,7 @@ pub async fn db2(
 	_req: actix_web::HttpRequest,
 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
 ) -> actix_web::HttpResponse {
-	type Table = crate::db::postgres::a::A;
+	type Table = crate::db::postgres::tb01sys::Tb01Sys;
 	let client = &state.pg;
 	let rows = Table::all().limit(3).run(client).await.unwrap();
 	let row = rows.first().unwrap();

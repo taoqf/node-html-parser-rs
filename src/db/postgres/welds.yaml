@@ -1,20 +1,20 @@
 tables:
 - schema: public
-  name: a
+  name: tb01sys
   manual_update: false
   model: null
   type: table
   columns:
-  - db_name: a
+  - db_name: key
     db_type: TEXT
-    model_name: a
+    model_name: key
     is_null: false
-    primary_key: false
+    primary_key: true
     writeable: true
-  - db_name: b
-    db_type: INT4
-    model_name: b
-    is_null: false
+  - db_name: value
+    db_type: TEXT
+    model_name: value
+    is_null: true
     primary_key: false
     writeable: true
   belongs_to: []
