@@ -1,4 +1,3 @@
-DROP SCHEMA public CASCADE;\nCREATE SCHEMA public;\nGRANT ALL ON SCHEMA public TO public;\n
 
 -- 删除系统表
 drop table if exists "tb01sys";
