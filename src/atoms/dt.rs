@@ -55,6 +55,13 @@ pub(crate) fn now_stamp() -> u64 {
 	return now as u64;
 }
 
+#[test]
+fn test_now_stamp() {
+	let now = now_stamp();
+	assert!(now > 0);
+	println!("now: {}", now);
+}
+
 #[allow(dead_code)]
 pub(crate) enum DtType {
 	DATE,
