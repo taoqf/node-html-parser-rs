@@ -60,6 +60,9 @@ where
 			data: Some(data),
 		}
 	}
+}
+
+impl Result<()> {
 	#[allow(dead_code)]
 	pub(crate) fn err(msg: &str) -> Self {
 		Self {
@@ -82,6 +85,9 @@ where
 			data: Some(data),
 		})
 	}
+}
+
+impl Result<()> {
 	#[allow(dead_code)]
 	pub(crate) fn res_err(msg: &str) -> actix_web::HttpResponse {
 		actix_web::HttpResponse::Ok().json(&Self {
