@@ -24,13 +24,16 @@ pub(crate) type SYSNAME = String;
 pub(crate) type NUMERIC = tiberius::numeric::Decimal;
 #[allow(dead_code)]
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub(crate) struct Result {
-	pub ok: bool,
+pub(crate) struct Result<T: serde::Serialize> {
+	pub(crate) ok: bool,
 	message: Option<String>,
-	data: Option<serde_json::Value>,
+	data: Option<T>,
 }
 
-impl Result {
+impl<T> Result<T>
+where
+	T: serde::Serialize,
+{
 	#[allow(dead_code)]
 	pub(crate) fn message(&self) -> &str {
 		assert!(self.ok == false);
@@ -38,16 +41,19 @@ impl Result {
 		return self.message.as_ref().unwrap();
 	}
 	#[allow(dead_code)]
-	pub(crate) fn data(&self) -> &serde_json::Value {
+	pub(crate) fn data(&self) -> &T {
 		assert!(self.ok == true);
 		assert!(self.data.is_some());
 		return self.data.as_ref().unwrap();
 	}
 }
 
-impl Result {
+impl<T> Result<T>
+where
+	T: serde::Serialize,
+{
 	#[allow(dead_code)]
-	pub(crate) fn ok(data: serde_json::Value) -> Self {
+	pub(crate) fn ok(data: T) -> Self {
 		Self {
 			ok: true,
 			message: None,
@@ -64,9 +70,12 @@ impl Result {
 	}
 }
 
-impl Result {
+impl<T> Result<T>
+where
+	T: serde::Serialize,
+{
 	#[allow(dead_code)]
-	pub(crate) fn res_ok(data: serde_json::Value) -> actix_web::HttpResponse {
+	pub(crate) fn res_ok(data: T) -> actix_web::HttpResponse {
 		actix_web::HttpResponse::Ok().json(&Self {
 			ok: true,
 			message: None,

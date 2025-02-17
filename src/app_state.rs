@@ -1,10 +1,10 @@
 #[allow(dead_code)]
 pub(crate) struct AppState {
-	pub appid: String,
-	pub appsecret: String,
-	pub pg: welds::connections::postgres::PostgresClient,
-	// pub mssql: welds::connections::mssql::MssqlClient,
-	// pub mysql: welds::connections::mysql::MysqlClient,
+	pub(crate) appid: String,
+	pub(crate) appsecret: String,
+	pub(crate) pg: welds::connections::postgres::PostgresClient,
+	// pub(crate) mssql: welds::connections::mssql::MssqlClient,
+	// pub(crate) mysql: welds::connections::mysql::MysqlClient,
 	// mssql2: deadpool_tiberius::Pool,
 }
 

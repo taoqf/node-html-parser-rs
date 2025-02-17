@@ -1,7 +1,7 @@
 use serde_json::json;
 
 #[actix_web::get("/")]
-pub async fn hello() -> &'static str {
+pub(crate) async fn hello() -> &'static str {
 	let url = format!("http://127.0.0.1:3000/api/{}?data=123", "test");
 	let client = reqwest::Client::new();
 
@@ -39,12 +39,12 @@ async fn test_hello_api() {
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
-pub struct Param {
+struct Param {
 	data: u32,
 }
 
 #[actix_web::get("/test")]
-pub async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpResponse {
+pub(crate) async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpResponse {
 	log::debug!("param = {}", data.data);
 	return actix_web::HttpResponse::Ok().json(json!({
 		"data": 100,
@@ -53,13 +53,13 @@ pub async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpRes
 }
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
-pub struct Data {
+struct Data {
 	data: u32,
 	msg: String,
 }
 
 #[actix_web::post("/test2/")]
-pub async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResponse {
+pub(crate) async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResponse {
 	log::debug!("param = {:#?}", data);
 	let client = reqwest::Client::new();
 	let res = client
@@ -80,13 +80,13 @@ pub async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResp
 }
 
 // #[derive(Debug, serde::Deserialize)]
-// pub struct Query {
+// struct Query {
 // 	data: u32,
 // 	msg: String,
 // }
 
 // #[actix_web::get("/db")]
-// pub async fn db(
+// pub(crate) async fn db(
 // 	_req: actix_web::HttpRequest,
 // 	query: actix_web::web::Query<Query>,
 // 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
@@ -110,7 +110,7 @@ pub async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::HttpResp
 // }
 
 #[actix_web::get("/db2")]
-pub async fn db2(
+pub(crate) async fn db2(
 	_req: actix_web::HttpRequest,
 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
 ) -> actix_web::HttpResponse {
@@ -132,7 +132,7 @@ pub async fn db2(
 // }
 
 // #[actix_web::get("/db3")]
-// pub async fn db3(
+// pub(crate) async fn db3(
 // 	_req: actix_web::HttpRequest,
 // 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
 // ) -> actix_web::HttpResponse {
