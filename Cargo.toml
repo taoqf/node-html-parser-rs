@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 dotenvy = "0.15.7"
-log = "0.4.22"
+log = "0.4.26"
 log4rs = "1.3.0"
-chrono = "0.4.39"
+chrono = "0.4.40"
 urlencoding = "2.1.3"
 serde_json = "1.0"
 # sea-orm = "1.1.3"
@@ -15,6 +15,7 @@ serde_json = "1.0"
 rust_decimal = "1.36.0"
 rayon = "1.10.0"
 actix-web = "4.9.0"
+rust_decimal_macros = "1.36.0"
 # diesel = { version = "2.2.6", features = ["postgres"] }
 
 [dependencies.deadpool-tiberius]
@@ -26,7 +27,7 @@ features = ["bigdecimal", "chrono", "native-tls", "opentls", "rust_decimal"]
 # features = ["json"]
 
 [dependencies.tokio]
-version = "1.42.0"
+version = "1.43.0"
 features = ["full"]
 
 [dependencies.tiberius]
@@ -46,15 +47,15 @@ version = "0.8.3"
 features = ["chrono", "runtime-async-std", "rust_decimal"]
 
 [dependencies.welds]
-version = "0.4.10"
+version = "0.4.11"
 features = ["mssql", "postgres", "mysql"]
 
 [dependencies.welds-connections]
-version = "0.4.10"
+version = "0.4.11"
 features = ["mssql", "mssql-rust_decimal", "postgres", "mysql"]
 
 [dependencies.uuid]
-version = "1.11.0"
+version = "1.15.1"
 features = [
 	"v4",                # Lets you generate random UUIDs
 	"fast-rng",          # Use a faster (but still sufficiently random) RNG
