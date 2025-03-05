@@ -1,3 +1,4 @@
+pub(crate) mod doccode;
 pub(crate) mod dt;
 pub(crate) mod str;
 pub(crate) mod types;
