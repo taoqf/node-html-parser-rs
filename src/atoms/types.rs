@@ -54,6 +54,7 @@ where
 {
 	#[allow(dead_code)]
 	pub(crate) fn ok(data: T) -> Self {
+		log::debug!("Ok: {}", serde_json::to_string(&data).unwrap_or_default());
 		Self {
 			ok: true,
 			message: None,
@@ -65,6 +66,7 @@ where
 impl Result<()> {
 	#[allow(dead_code)]
 	pub(crate) fn err(msg: &str) -> Self {
+		log::error!("Err: {}", msg);
 		Self {
 			ok: false,
 			message: Some(msg.to_owned()),
@@ -79,6 +81,10 @@ where
 {
 	#[allow(dead_code)]
 	pub(crate) fn res_ok(data: T) -> actix_web::HttpResponse {
+		log::debug!(
+			"Response Ok: {}",
+			serde_json::to_string(&data).unwrap_or_default()
+		);
 		actix_web::HttpResponse::Ok().json(&Self {
 			ok: true,
 			message: None,
@@ -90,6 +96,7 @@ where
 impl Result<()> {
 	#[allow(dead_code)]
 	pub(crate) fn res_err(msg: &str) -> actix_web::HttpResponse {
+		log::error!("Response Err: {}", msg);
 		actix_web::HttpResponse::Ok().json(&Self {
 			ok: false,
 			message: Some(msg.to_owned()),
