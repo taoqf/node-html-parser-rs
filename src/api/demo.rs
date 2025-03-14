@@ -109,21 +109,21 @@ pub(crate) async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::H
 // 	return msg;
 // }
 
-#[actix_web::get("/db2")]
-pub(crate) async fn db2(
-	_req: actix_web::HttpRequest,
-	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
-) -> actix_web::HttpResponse {
-	type Table = crate::db::postgres::tb01sys::Tb01Sys;
-	let client = &state.pg;
-	let rows = Table::all().limit(3).run(client).await.unwrap();
-	let row = rows.first().unwrap();
-	dbg!(row);
+// #[actix_web::get("/db2")]
+// pub(crate) async fn db2(
+// 	_req: actix_web::HttpRequest,
+// 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
+// ) -> actix_web::HttpResponse {
+// 	type Table = crate::db::postgres::tb01sys::Tb01Sys;
+// 	let client = &state.pg;
+// 	let rows = Table::all().limit(3).run(client).await.unwrap();
+// 	let row = rows.first().unwrap();
+// 	dbg!(row);
 
-	return actix_web::HttpResponse::Ok().json(serde_json::json!({
-		"foo": "bar"
-	}));
-}
+// 	return actix_web::HttpResponse::Ok().json(serde_json::json!({
+// 		"foo": "bar"
+// 	}));
+// }
 
 // #[derive(Debug, serde::Serialize)]
 // struct ReturnResult {

@@ -2,7 +2,7 @@
 pub(crate) struct AppState {
 	pub(crate) appid: String,
 	pub(crate) appsecret: String,
-	pub(crate) pg: welds::connections::postgres::PostgresClient,
+	// pub(crate) pg: welds::connections::postgres::PostgresClient,
 	// pub(crate) mssql: welds::connections::mssql::MssqlClient,
 	// pub(crate) mysql: welds::connections::mysql::MysqlClient,
 	// mssql2: deadpool_tiberius::Pool,
@@ -15,19 +15,20 @@ impl AppState {
 		let appsecret = std::env::var("WX_APPSECRET").unwrap();
 		log::debug!("appsecret={}", appsecret);
 
-		let pg = get_pg("DB_PG").await;
+		// let pg = get_pg("DB_PG").await;
 		// let mssql = get_mssql("DB_MSSQL").await;
 		// let mysql = get_mysql("DB_MYSQL").await;
 		return Self {
 			appid,
 			appsecret,
-			pg,
+			// pg,
 			// mssql,
 			// mysql,
 		};
 	}
 }
 
+#[allow(dead_code)]
 async fn get_pg(env_key: &str) -> welds::connections::postgres::PostgresClient {
 	let url_db = std::env::var(env_key).unwrap();
 	log::debug!("DB_URL={}", url_db);
