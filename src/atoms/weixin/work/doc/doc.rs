@@ -1,5 +1,3 @@
-use log::debug;
-
 #[allow(dead_code)]
 pub(crate) enum DocType {
 	/// 文档

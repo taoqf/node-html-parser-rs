@@ -1,11 +1,9 @@
-use crate::atoms::weixin;
-
 #[allow(dead_code)]
 pub(crate) struct AppState {
 	pub(crate) appid: String,
 	pub(crate) appsecret: String,
-	pub(crate) weixinwork: super::atoms::weixin::work::index::WeixinWork,
-	pub(crate) weixin: super::atoms::weixin::weixin::index::Weixin,
+	// pub(crate) weixinwork: super::atoms::weixin::work::index::WeixinWork,
+	// pub(crate) weixin: super::atoms::weixin::weixin::index::Weixin,
 	pub(crate) pg: Box<dyn welds::Client>,
 }
 
@@ -18,14 +16,14 @@ impl AppState {
 
 		let pg = crate::atoms::db::get_db("DB_PG").await;
 
-		let weixinwork = weixin::work::index::WeixinWork::new().await;
-		let weixin = weixin::weixin::index::Weixin::new().await;
+		// let weixinwork = crate::atoms::weixin::work::index::WeixinWork::new().await;
+		// let weixin = crate::atoms::weixin::weixin::index::Weixin::new().await;
 
 		return Self {
 			appid,
 			appsecret,
-			weixin,
-			weixinwork,
+			// weixin,
+			// weixinwork,
 			pg,
 		};
 	}
