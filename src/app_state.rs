@@ -1,11 +1,12 @@
+use crate::atoms::weixin;
+
 #[allow(dead_code)]
 pub(crate) struct AppState {
 	pub(crate) appid: String,
 	pub(crate) appsecret: String,
-	// pub(crate) pg: welds::connections::postgres::PostgresClient,
-	// pub(crate) mssql: welds::connections::mssql::MssqlClient,
-	// pub(crate) mysql: welds::connections::mysql::MysqlClient,
-	// mssql2: deadpool_tiberius::Pool,
+	pub(crate) weixinwork: super::atoms::weixin::work::index::WeixinWork,
+	pub(crate) weixin: super::atoms::weixin::weixin::index::Weixin,
+	pub(crate) pg: Box<dyn welds::Client>,
 }
 
 impl AppState {
@@ -15,58 +16,60 @@ impl AppState {
 		let appsecret = std::env::var("WX_APPSECRET").unwrap();
 		log::debug!("appsecret={}", appsecret);
 
-		// let pg = get_pg("DB_PG").await;
-		// let mssql = get_mssql("DB_MSSQL").await;
-		// let mysql = get_mysql("DB_MYSQL").await;
+		let pg = crate::atoms::db::get_db("DB_PG").await;
+
+		let weixinwork = weixin::work::index::WeixinWork::new().await;
+		let weixin = weixin::weixin::index::Weixin::new().await;
+
 		return Self {
 			appid,
 			appsecret,
-			// pg,
-			// mssql,
-			// mysql,
+			weixin,
+			weixinwork,
+			pg,
 		};
 	}
 }
 
-#[allow(dead_code)]
-async fn get_pg(env_key: &str) -> welds::connections::postgres::PostgresClient {
-	let url_db = std::env::var(env_key).unwrap();
-	log::debug!("DB_URL={}", url_db);
-	let client = welds::connections::postgres::connect(url_db.as_str())
-		.await
-		.unwrap();
-	return client;
-}
+// #[allow(dead_code)]
+// async fn get_pg(env_key: &str) -> welds::connections::postgres::PostgresClient {
+// 	let url_db = std::env::var(env_key).unwrap();
+// 	log::debug!("DB_URL={}", url_db);
+// 	let client = welds::connections::postgres::connect(url_db.as_str())
+// 		.await
+// 		.unwrap();
+// 	return client;
+// }
 
-#[allow(dead_code)]
-async fn get_mssql(env_key: &str) -> welds::connections::mssql::MssqlClient {
-	let url_db = std::env::var(env_key).unwrap();
-	log::debug!("DB_URL={}", url_db);
-	let client = welds::connections::mssql::connect(url_db.as_str())
-		.await
-		.unwrap();
-	return client;
-}
+// #[allow(dead_code)]
+// async fn get_mssql(env_key: &str) -> welds::connections::mssql::MssqlClient {
+// 	let url_db = std::env::var(env_key).unwrap();
+// 	log::debug!("DB_URL={}", url_db);
+// 	let client = welds::connections::mssql::connect(url_db.as_str())
+// 		.await
+// 		.unwrap();
+// 	return client;
+// }
 
-#[allow(dead_code)]
-async fn get_mssql2(env_key: &str, pool_size: u32) -> deadpool_tiberius::Pool {
-	let url_db = std::env::var(env_key).unwrap();
-	log::debug!("DB_URL={}", url_db);
+// #[allow(dead_code)]
+// async fn get_mssql2(env_key: &str, pool_size: u32) -> deadpool_tiberius::Pool {
+// 	let url_db = std::env::var(env_key).unwrap();
+// 	log::debug!("DB_URL={}", url_db);
 
-	let pool = deadpool_tiberius::Manager::from_ado_string(&url_db)
-		.unwrap()
-		.max_size(pool_size as usize)
-		.create_pool()
-		.unwrap();
-	return pool;
-}
+// 	let pool = deadpool_tiberius::Manager::from_ado_string(&url_db)
+// 		.unwrap()
+// 		.max_size(pool_size as usize)
+// 		.create_pool()
+// 		.unwrap();
+// 	return pool;
+// }
 
-#[allow(dead_code)]
-async fn get_mysql(env_key: &str) -> welds::connections::mysql::MysqlClient {
-	let url_db = std::env::var(env_key).unwrap();
-	log::debug!("DB_URL={}", url_db);
-	let client = welds::connections::mysql::connect(url_db.as_str())
-		.await
-		.unwrap();
-	return client;
-}
+// #[allow(dead_code)]
+// async fn get_mysql(env_key: &str) -> welds::connections::mysql::MysqlClient {
+// 	let url_db = std::env::var(env_key).unwrap();
+// 	log::debug!("DB_URL={}", url_db);
+// 	let client = welds::connections::mysql::connect(url_db.as_str())
+// 		.await
+// 		.unwrap();
+// 	return client;
+// }
