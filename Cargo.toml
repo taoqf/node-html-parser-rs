@@ -46,7 +46,7 @@ features = ["derive"]
 
 [dependencies.sqlx]
 version = "0.8.3"
-features = ["chrono", "runtime-async-std", "rust_decimal"]
+features = ["chrono", "runtime-async-std", "rust_decimal", "postgres", "json"]
 
 [dependencies.welds]
 version = "0.4.11"
