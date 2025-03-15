@@ -94,7 +94,7 @@ pub(crate) async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::H
 // 	log::debug!("param = {:#?}", query);
 // 	log::debug!("data = {}", query.data);
 // 	log::debug!("msg = {}", query.msg);
-// 	let client = &state.mssql;
+// 	let client = state.mssql.as_ref();
 // 	let rows = crate::db::mssql::sys_user::SysUser::all()
 // 		.limit(3)
 // 		.run(client)
@@ -115,7 +115,7 @@ pub(crate) async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::H
 // 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
 // ) -> actix_web::HttpResponse {
 // 	type Table = crate::db::postgres::tb01sys::Tb01Sys;
-// 	let client = &state.pg;
+// 	let client = state.pg.as_ref();
 // 	let rows = Table::all().limit(3).run(client).await.unwrap();
 // 	let row = rows.first().unwrap();
 // 	dbg!(row);
