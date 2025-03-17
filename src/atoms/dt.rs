@@ -1,12 +1,10 @@
 use std::str::FromStr;
 
-use super::types::DATETIME;
-
 /**
  * 获取当前时间
  */
 #[allow(dead_code)]
-pub(crate) fn now() -> DATETIME {
+pub(crate) fn now() -> chrono::NaiveDateTime {
 	let now = chrono::Local::now();
 	let dt = now.naive_local();
 	return dt;

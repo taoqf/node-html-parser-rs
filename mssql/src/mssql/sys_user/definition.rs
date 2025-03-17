@@ -8,7 +8,7 @@
 
 use welds::WeldsModel;
 
-use crate::atoms::types::{DATETIME, TIMESTAMP};
+use crate::types::{DATETIME, TIMESTAMP};
 
 #[derive(Debug, WeldsModel)]
 #[welds(schema = "dbo", table = "sysUser")]
