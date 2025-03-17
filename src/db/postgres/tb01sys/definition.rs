@@ -5,7 +5,6 @@
  * If you want to take control of this file and prevent welds-cli from overriding it,
  * You can set the flag `manual_update: true` for this table in the welds.yaml config.
 ******************************************************************************/
-
 use welds::WeldsModel;
 #[derive(Debug, WeldsModel)]
 #[welds(schema = "public", table = "tb01sys")]
@@ -13,4 +12,5 @@ pub struct Tb01Sys {
 	#[welds(primary_key)]
 	pub key: String,
 	pub value: Option<String>,
+	// pub value2: serde_json::Value,
 }
