@@ -385,15 +385,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-mutex"
-version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "479db852db25d9dbf6204e6cb6253698f175c15726470f78af0d918e99d6156e"
-dependencies = [
- "event-listener 2.5.3",
-]
-
-[[package]]
 name = "async-native-tls"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -508,30 +499,6 @@ name = "base64ct"
 version = "1.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89e25b6adfb930f02d1981565a6e5d9c547ac15a96606256d3b59040e5cd4ca3"
-
-[[package]]
-name = "bb8"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "212d8b8e1a22743d9241575c6ba822cf9c8fef34771c86ab7e477a4fbfd254e5"
-dependencies = [
- "futures-util",
- "parking_lot",
- "tokio",
-]
-
-[[package]]
-name = "bb8-tiberius"
-version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a5023b318f47a294d02b46ce0d82ac8e7df0afce2257f041ba7316566d6cd56"
-dependencies = [
- "bb8",
- "thiserror 1.0.69",
- "tiberius",
- "tokio",
- "tokio-util",
-]
 
 [[package]]
 name = "bitflags"
@@ -905,7 +872,6 @@ dependencies = [
  "futures",
  "log",
  "log4rs",
- "mssql",
  "rayon",
  "regex",
  "reqwest",
@@ -1357,12 +1323,6 @@ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 dependencies = [
  "ahash",
 ]
-
-[[package]]
-name = "hashbrown"
-version = "0.14.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
 
 [[package]]
 name = "hashbrown"
@@ -1987,19 +1947,6 @@ dependencies = [
  "log",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "mssql"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "serde",
- "serde_json",
- "sqlx",
- "tiberius",
- "welds",
- "welds-connections",
 ]
 
 [[package]]
@@ -3324,7 +3271,6 @@ dependencies = [
  "asynchronous-codec",
  "byteorder",
  "bytes",
- "chrono",
  "connection-string",
  "encoding_rs",
  "enumflags2",
@@ -3335,8 +3281,6 @@ dependencies = [
  "pretty-hex",
  "rust_decimal",
  "thiserror 1.0.69",
- "tokio",
- "tokio-util",
  "tracing",
  "uuid",
  "winauth",
@@ -3455,12 +3399,8 @@ checksum = "6b9590b93e6fcc1739458317cccd391ad3955e2bde8913edf6f95f9e65a8f034"
 dependencies = [
  "bytes",
  "futures-core",
- "futures-io",
  "futures-sink",
- "futures-util",
- "hashbrown 0.14.5",
  "pin-project-lite",
- "slab",
  "tokio",
 ]
 
@@ -3827,18 +3767,10 @@ version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f9b3d9b84785877e494bb34a2f3db7133bdb5e43579a5a998cbb5c47c778821"
 dependencies = [
- "async-mutex",
  "async-trait",
- "bb8",
- "bb8-tiberius",
- "futures",
- "futures-util",
  "log",
  "sqlx",
  "thiserror 1.0.69",
- "tiberius",
- "tokio",
- "tokio-util",
 ]
 
 [[package]]
