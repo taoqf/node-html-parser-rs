@@ -50,10 +50,10 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			.unwrap()
-			.json::<AddSheetResult>()
-			.await
 			.unwrap();
+		let ret = ret.text().await.unwrap();
+		log::debug!("add sheet result: {:?}", ret);
+		let ret = serde_json::from_str::<AddSheetResult>(&ret).unwrap();
 		log::debug!("add sheet record result: {:?}", ret);
 		assert!(ret.errcode == 0, "failed to add sheet: {}", ret.errmsg);
 		let sheet = ret.properties;
@@ -101,10 +101,10 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			.unwrap()
-			.json::<AddSheetRecordResult>()
-			.await
 			.unwrap();
+		let ret = ret.text().await.unwrap();
+		log::debug!("add sheet record result: {:?}", ret);
+		let ret = serde_json::from_str::<AddSheetRecordResult>(&ret).unwrap();
 		log::debug!("add records result: {:?}", ret);
 		assert!(ret.errcode == 0, "failed to add records: {}", ret.errmsg);
 	}
@@ -145,10 +145,9 @@ impl super::super::index::WeixinWork {
 				}))
 				.send()
 				.await
-				.unwrap()
-				.json::<GetSheetRecordResult>()
-				.await
 				.unwrap();
+			let ret = ret.text().await.unwrap();
+			let ret = serde_json::from_str::<GetSheetRecordResult>(&ret).unwrap();
 			log::debug!("get records result: {:?}", ret);
 			assert!(ret.errcode == 0, "failed to get records: {}", ret.errmsg);
 			offset = ret.next;
@@ -196,10 +195,9 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			.unwrap()
-			.json::<UpdateSheetRecordResult>()
-			.await
 			.unwrap();
+		let ret = ret.text().await.unwrap();
+		let ret = serde_json::from_str::<UpdateSheetRecordResult>(&ret).unwrap();
 		log::debug!("update records result: {:?}", ret);
 		assert!(ret.errcode == 0, "failed to update records: {}", ret.errmsg);
 	}
@@ -237,10 +235,9 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			.unwrap()
-			.json::<DelSheetRecordResult>()
-			.await
 			.unwrap();
+		let ret = ret.text().await.unwrap();
+		let ret = serde_json::from_str::<DelSheetRecordResult>(&ret).unwrap();
 		log::debug!("del sheet records result: {:?}", ret);
 		assert!(ret.errcode == 0, "failed to delete records: {}", ret.errmsg);
 	}
@@ -428,10 +425,12 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			.unwrap()
-			.json::<SheetGetFieldsResult>()
-			.await
+			// .unwrap()
+			// .json::<SheetGetFieldsResult>()
+			// .await
 			.unwrap();
+		let ret = ret.text().await.unwrap();
+		let ret = serde_json::from_str::<SheetGetFieldsResult>(&ret).unwrap();
 		log::debug!("get sheet fields result: {:?}", ret);
 		assert!(
 			ret.errcode == 0,
@@ -509,10 +508,9 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			.unwrap()
-			.json::<AddFieldsResult>()
-			.await
 			.unwrap();
+		let ret = ret.text().await.unwrap();
+		let ret = serde_json::from_str::<AddFieldsResult>(&ret).unwrap();
 		log::debug!("add sheet fields result: {:?}", ret);
 		assert!(
 			ret.errcode == 0,
@@ -554,10 +552,12 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			.unwrap()
-			.json::<UpdateFieldsResult>()
-			.await
+			// .unwrap()
+			// .json::<UpdateFieldsResult>()
+			// .await
 			.unwrap();
+		let ret = ret.text().await.unwrap();
+		let ret = serde_json::from_str::<UpdateFieldsResult>(&ret).unwrap();
 		log::debug!("update sheet fields result: {:?}", ret);
 		assert!(
 			ret.errcode == 0,
@@ -598,10 +598,12 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			.unwrap()
-			.json::<DeleteFieldsResult>()
-			.await
+			// .unwrap()
+			// .json::<DeleteFieldsResult>()
+			// .await
 			.unwrap();
+		let ret = ret.text().await.unwrap();
+		let ret = serde_json::from_str::<DeleteFieldsResult>(&ret).unwrap();
 		log::debug!("update sheet fields result: {:?}", ret);
 		assert!(
 			ret.errcode == 0,
