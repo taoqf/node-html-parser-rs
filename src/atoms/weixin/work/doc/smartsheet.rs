@@ -468,7 +468,7 @@ pub(crate) struct AddField {
 
 #[allow(dead_code)]
 impl AddField {
-	fn new(field_title: &str, field_type: &str) -> Self {
+	pub(crate) fn new(field_title: &str, field_type: &str) -> Self {
 		Self {
 			field_title: field_title.to_string(),
 			field_type: field_type.to_string(),
