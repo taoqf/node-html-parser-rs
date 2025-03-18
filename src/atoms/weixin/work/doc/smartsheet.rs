@@ -11,7 +11,7 @@ pub(crate) struct Sheet {
 impl super::super::index::WeixinWork {
 	/// 添加子表
 	/// @see https://developer.work.weixin.qq.com/document/path/100214
-	pub(crate) async fn doc_smartsheet_add(&mut self, docid: &str, sheet_name: &str) -> Sheet {
+	pub(crate) async fn doc_smartsheet_add(&self, docid: &str, sheet_name: &str) -> Sheet {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(
 			sheet_name.is_empty() == false,
@@ -73,7 +73,7 @@ impl super::super::index::WeixinWork {
 	/// records 参见 https://developer.work.weixin.qq.com/document/path/100224#addrecord，
 	/// 由于其灵活性，不方便封装为结构体，可在使用时根据官方文档生成。
 	pub(crate) async fn doc_smartsheet_record_add(
-		&mut self,
+		&self,
 		docid: &str,
 		sheet_id: &str,
 		records: Vec<serde_json::Value>,
@@ -114,7 +114,7 @@ impl super::super::index::WeixinWork {
 impl super::super::index::WeixinWork {
 	/// 查询记录
 	/// @see https://developer.work.weixin.qq.com/document/path/100230
-	pub(crate) async fn doc_smartsheet_record_get(&mut self, docid: &str, sheet_id: &str) {
+	pub(crate) async fn doc_smartsheet_record_get(&self, docid: &str, sheet_id: &str) {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
 		let token = self.get_access_token().await;
@@ -168,7 +168,7 @@ impl super::super::index::WeixinWork {
 	/// records 参见 https://developer.work.weixin.qq.com/document/path/100226#updaterecord，
 	/// 由于其灵活性，不方便封装为结构体，可在使用时根据官方文档生成。
 	pub(crate) async fn doc_smartsheet_record_update(
-		&mut self,
+		&self,
 		docid: &str,
 		sheet_id: &str,
 		records: &Vec<serde_json::Value>,
@@ -210,7 +210,7 @@ impl super::super::index::WeixinWork {
 	/// 删除记录
 	/// @see https://developer.work.weixin.qq.com/document/path/100225
 	pub(crate) async fn doc_smartsheet_record_del(
-		&mut self,
+		&self,
 		docid: &str,
 		sheet_id: &str,
 		records: Vec<String>,
@@ -402,7 +402,7 @@ impl super::super::index::WeixinWork {
 	/// 查询字段
 	/// @see https://developer.work.weixin.qq.com/document/path/99914
 	pub(crate) async fn doc_smartsheet_fields_get(
-		&mut self,
+		&self,
 		docid: &str,
 		sheet_id: &str,
 	) -> Vec<Field> {
@@ -482,7 +482,7 @@ impl super::super::index::WeixinWork {
 	/// 添加字段
 	/// @see https://developer.work.weixin.qq.com/document/path/99904
 	pub(crate) async fn doc_smartsheet_fields_add(
-		&mut self,
+		&self,
 		docid: &str,
 		sheet_id: &str,
 		fields: &Vec<AddField>,
@@ -527,7 +527,7 @@ impl super::super::index::WeixinWork {
 	/// 更新字段
 	/// @see https://developer.work.weixin.qq.com/document/path/99906
 	pub(crate) async fn doc_smartsheet_fields_update(
-		&mut self,
+		&self,
 		docid: &str,
 		sheet_id: &str,
 		fields: &Vec<Field>,
@@ -572,7 +572,7 @@ impl super::super::index::WeixinWork {
 	/// 删除字段
 	/// @see https://developer.work.weixin.qq.com/document/path/99905
 	pub(crate) async fn doc_smartsheet_fields_del(
-		&mut self,
+		&self,
 		docid: &str,
 		sheet_id: &str,
 		field_ids: &Vec<String>,
