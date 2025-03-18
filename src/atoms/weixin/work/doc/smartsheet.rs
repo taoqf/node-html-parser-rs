@@ -443,6 +443,41 @@ impl super::super::index::WeixinWork {
 }
 
 #[allow(dead_code)]
+#[derive(Debug, serde::Serialize, serde:: Deserialize, Default)]
+pub(crate) struct AddField {
+	// pub(crate) field_id: String, // 自动生成
+	pub(crate) field_title: String,
+	pub(crate) field_type: String,
+	pub(crate) property_number: Option<NumberFieldProperty>,
+	pub(crate) property_checkbox: Option<CheckboxFieldProperty>,
+	pub(crate) property_date_time: Option<DateTimeFieldProperty>,
+	pub(crate) property_attachment: Option<AttachmentFieldProperty>,
+	pub(crate) property_user: Option<UserFieldProperty>,
+	pub(crate) property_url: Option<UrlFieldProperty>,
+	pub(crate) property_select: Option<SelectFieldProperty>,
+	pub(crate) property_created_time: Option<CreatedTimeFieldProperty>,
+	pub(crate) property_modified_time: Option<ModifiedTimeFieldProperty>,
+	pub(crate) property_progress: Option<ProgressFieldProperty>,
+	pub(crate) property_single_select: Option<SingleSelectFieldProperty>,
+	pub(crate) property_reference: Option<ReferenceFieldProperty>,
+	pub(crate) property_location: Option<LocationFieldProperty>,
+	pub(crate) property_auto_number: Option<AutoNumberFieldProperty>,
+	pub(crate) property_currency: Option<CurrencyFieldProperty>,
+	pub(crate) property_ww_group: Option<WwGroupFieldProperty>,
+}
+
+#[allow(dead_code)]
+impl AddField {
+	fn new(field_title: &str, field_type: &str) -> Self {
+		Self {
+			field_title: field_title.to_string(),
+			field_type: field_type.to_string(),
+			..Default::default()
+		}
+	}
+}
+
+#[allow(dead_code)]
 impl super::super::index::WeixinWork {
 	/// 添加字段
 	/// @see https://developer.work.weixin.qq.com/document/path/99904
