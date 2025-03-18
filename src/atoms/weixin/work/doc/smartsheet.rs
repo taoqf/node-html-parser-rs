@@ -485,7 +485,7 @@ impl super::super::index::WeixinWork {
 		&mut self,
 		docid: &str,
 		sheet_id: &str,
-		fields: &Vec<Field>,
+		fields: &Vec<AddField>,
 	) {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
