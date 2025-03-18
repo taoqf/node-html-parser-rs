@@ -147,6 +147,7 @@ impl super::super::index::WeixinWork {
 				.await
 				.unwrap();
 			let ret = ret.text().await.unwrap();
+			log::debug!("get sheet record result: {:?}", ret);
 			let ret = serde_json::from_str::<GetSheetRecordResult>(&ret).unwrap();
 			log::debug!("get records result: {:?}", ret);
 			assert!(ret.errcode == 0, "failed to get records: {}", ret.errmsg);
@@ -197,6 +198,7 @@ impl super::super::index::WeixinWork {
 			.await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
+		log::debug!("update records result: {:?}", ret);
 		let ret = serde_json::from_str::<UpdateSheetRecordResult>(&ret).unwrap();
 		log::debug!("update records result: {:?}", ret);
 		assert!(ret.errcode == 0, "failed to update records: {}", ret.errmsg);
@@ -237,6 +239,7 @@ impl super::super::index::WeixinWork {
 			.await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
+		log::debug!("del sheet records result: {:?}", ret);
 		let ret = serde_json::from_str::<DelSheetRecordResult>(&ret).unwrap();
 		log::debug!("del sheet records result: {:?}", ret);
 		assert!(ret.errcode == 0, "failed to delete records: {}", ret.errmsg);
@@ -427,6 +430,7 @@ impl super::super::index::WeixinWork {
 			.await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
+		log::debug!("get sheet fields result: {:?}", ret);
 		let ret = serde_json::from_str::<SheetGetFieldsResult>(&ret).unwrap();
 		log::debug!("get sheet fields result: {:?}", ret);
 		assert!(
@@ -507,6 +511,7 @@ impl super::super::index::WeixinWork {
 			.await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
+		log::debug!("add sheet fields result: {}", ret);
 		let ret = serde_json::from_str::<AddFieldsResult>(&ret).unwrap();
 		log::debug!("add sheet fields result: {:?}", ret);
 		assert!(
@@ -551,6 +556,7 @@ impl super::super::index::WeixinWork {
 			.await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
+		log::debug!("update sheet fields result: {}", ret);
 		let ret = serde_json::from_str::<UpdateFieldsResult>(&ret).unwrap();
 		log::debug!("update sheet fields result: {:?}", ret);
 		assert!(
@@ -594,6 +600,7 @@ impl super::super::index::WeixinWork {
 			.await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
+		log::debug!("update sheet fields result: {}", ret);
 		let ret = serde_json::from_str::<DeleteFieldsResult>(&ret).unwrap();
 		log::debug!("update sheet fields result: {:?}", ret);
 		assert!(
