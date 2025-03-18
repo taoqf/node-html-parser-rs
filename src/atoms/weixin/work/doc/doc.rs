@@ -108,6 +108,7 @@ impl super::super::index::WeixinWork {
 			sheet_id: String,
 			title: String,
 			is_visible: bool,
+			#[serde(rename = "type")]
 			sheet_type: String, //"smartsheet"
 		}
 		#[derive(Debug, serde:: Deserialize)]
