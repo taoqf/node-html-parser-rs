@@ -425,9 +425,6 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			// .unwrap()
-			// .json::<SheetGetFieldsResult>()
-			// .await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
 		let ret = serde_json::from_str::<SheetGetFieldsResult>(&ret).unwrap();
@@ -552,9 +549,6 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			// .unwrap()
-			// .json::<UpdateFieldsResult>()
-			// .await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
 		let ret = serde_json::from_str::<UpdateFieldsResult>(&ret).unwrap();
@@ -598,9 +592,6 @@ impl super::super::index::WeixinWork {
 			}))
 			.send()
 			.await
-			// .unwrap()
-			// .json::<DeleteFieldsResult>()
-			// .await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
 		let ret = serde_json::from_str::<DeleteFieldsResult>(&ret).unwrap();
