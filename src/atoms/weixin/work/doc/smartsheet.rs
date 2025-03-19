@@ -334,7 +334,7 @@ pub(crate) struct ReferenceFieldProperty {
 	pub(crate) sub_id: String,
 	pub(crate) field_id: String,
 	pub(crate) is_multiple: bool,
-	pub(crate) view_id: String,
+	pub(crate) view_id: Option<String>,
 }
 
 #[allow(dead_code)]
