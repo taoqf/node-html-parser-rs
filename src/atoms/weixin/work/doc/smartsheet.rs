@@ -110,6 +110,16 @@ impl super::super::index::WeixinWork {
 	}
 }
 
+#[derive(Debug, serde:: Deserialize, serde::Serialize)]
+pub(crate) struct SheetRecord {
+	pub(crate) record_id: String,
+	pub(crate) create_time: u64,
+	pub(crate) update_time: u64,
+	pub(crate) values: serde_json::Value,
+	pub(crate) creator_name: String,
+	pub(crate) updater_name: String,
+}
+
 #[allow(dead_code)]
 impl super::super::index::WeixinWork {
 	/// 查询记录
@@ -118,25 +128,34 @@ impl super::super::index::WeixinWork {
 		&self,
 		docid: &str,
 		sheet_id: &str,
-	) -> Vec<serde_json::Value> {
+	) -> Vec<SheetRecord> {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
 		let token = self.get_access_token().await;
 		let url = format!(
 			"https://qyapi.weixin.qq.com/cgi-bin/wedoc/smartsheet/get_records?access_token={token}"
 		);
+		#[derive(Debug, serde:: Deserialize, serde::Serialize)]
+		struct RecordData {
+			record_id: String,
+			create_time: String,
+			update_time: String,
+			values: serde_json::Value,
+			creator_name: String,
+			updater_name: String,
+		}
 		#[derive(Debug, serde:: Deserialize)]
 		struct GetSheetRecordResult {
 			errcode: i32,
 			errmsg: String,
-			records: Vec<serde_json::Value>,
+			records: Vec<RecordData>,
 			total: u32,
 			next: u32,
 			has_more: bool,
 		}
 		let client = reqwest::Client::new();
 		let mut offset = 0;
-		let mut records: Vec<serde_json::Value> = Vec::new();
+		let mut records: Vec<SheetRecord> = Vec::new();
 		loop {
 			let ret = client
 				.post(&url)
@@ -156,7 +175,14 @@ impl super::super::index::WeixinWork {
 			log::debug!("get records result: {:?}", ret);
 			assert!(ret.errcode == 0, "failed to get records: {}", ret.errmsg);
 			offset = ret.next;
-			records.extend(ret.records);
+			records.extend(ret.records.iter().map(|r| SheetRecord {
+				create_time: r.create_time.parse().unwrap(),
+				creator_name: r.creator_name.clone(),
+				record_id: r.record_id.clone(),
+				update_time: r.update_time.parse().unwrap(),
+				updater_name: r.updater_name.clone(),
+				values: r.values.clone(),
+			}));
 			if ret.has_more == false {
 				break;
 			}
