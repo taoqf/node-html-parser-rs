@@ -322,6 +322,7 @@ pub(crate) struct ProgressFieldProperty {
 #[allow(dead_code)]
 #[derive(Debug, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct SingleSelectFieldProperty {
+	pub(crate) is_multiple: bool,
 	pub(crate) is_quick_add: bool,
 	pub(crate) options: Vec<SelectOption>,
 }
@@ -330,8 +331,8 @@ pub(crate) struct SingleSelectFieldProperty {
 #[derive(Debug, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct ReferenceFieldProperty {
 	/// 关联的子表id，为空时，表示关联本子表
-	pub(crate) sub_id: Option<String>,
-	pub(crate) filed_id: String,
+	pub(crate) sub_id: String,
+	pub(crate) field_id: String,
 	pub(crate) is_multiple: bool,
 	pub(crate) view_id: String,
 }
@@ -497,7 +498,7 @@ impl super::super::index::WeixinWork {
 		struct AddFieldsResult {
 			errcode: i32,
 			errmsg: String,
-			fields: Vec<Field>,
+			// fields: Vec<Field>,
 		}
 		let client = reqwest::Client::new();
 		let ret = client
@@ -516,7 +517,8 @@ impl super::super::index::WeixinWork {
 		log::debug!("add sheet fields result: {:?}", ret);
 		assert!(
 			ret.errcode == 0,
-			"failed to add sheet fields: {}",
+			"failed to add sheet fields: {}:{}",
+			sheet_id,
 			ret.errmsg
 		);
 	}
