@@ -114,7 +114,11 @@ impl super::super::index::WeixinWork {
 impl super::super::index::WeixinWork {
 	/// 查询记录
 	/// @see https://developer.work.weixin.qq.com/document/path/100230
-	pub(crate) async fn doc_smartsheet_record_get(&self, docid: &str, sheet_id: &str) {
+	pub(crate) async fn doc_smartsheet_record_get(
+		&self,
+		docid: &str,
+		sheet_id: &str,
+	) -> Vec<serde_json::Value> {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
 		let token = self.get_access_token().await;
@@ -157,7 +161,7 @@ impl super::super::index::WeixinWork {
 				break;
 			}
 		}
-		return;
+		return records;
 	}
 }
 
