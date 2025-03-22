@@ -76,7 +76,7 @@ impl super::super::index::WeixinWork {
 		&self,
 		docid: &str,
 		sheet_id: &str,
-		records: Vec<serde_json::Value>,
+		records: &[serde_json::Value],
 	) {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
@@ -91,6 +91,16 @@ impl super::super::index::WeixinWork {
 			records: serde_json::Value,
 		}
 		let client = reqwest::Client::new();
+		let records = serde_json::Value::Array(
+			records
+				.iter()
+				.map(|values| {
+					serde_json::json!({
+					"values": values
+					})
+				})
+				.collect(),
+		);
 		let ret = client
 			.post(url)
 			.json(&serde_json::json!({
@@ -155,7 +165,7 @@ impl super::super::index::WeixinWork {
 		}
 		let client = reqwest::Client::new();
 		let mut offset = 0;
-		let mut records: Vec<SheetRecord> = Vec::new();
+		let mut records = Vec::new();
 		loop {
 			let ret = client
 				.post(&url)
@@ -201,7 +211,7 @@ impl super::super::index::WeixinWork {
 		&self,
 		docid: &str,
 		sheet_id: &str,
-		records: &Vec<serde_json::Value>,
+		records: &[serde_json::Value],
 	) {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
@@ -243,7 +253,7 @@ impl super::super::index::WeixinWork {
 		&self,
 		docid: &str,
 		sheet_id: &str,
-		records: Vec<String>,
+		records: &[String],
 	) {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
@@ -277,47 +287,47 @@ impl super::super::index::WeixinWork {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct NumberFieldProperty {
 	pub(crate) decimal_places: i32,
 	pub(crate) use_separate: bool,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct CheckboxFieldProperty {
 	pub(crate) checked: bool,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct DateTimeFieldProperty {
 	pub(crate) format: String,
 	pub(crate) auto_fill: bool,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct AttachmentFieldProperty {
 	pub(crate) display_mode: String,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct UserFieldProperty {
 	pub(crate) is_multiple: bool,
 	pub(crate) is_notified: bool,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct UrlFieldProperty {
 	#[serde(rename = "type")]
 	pub(crate) url_type: String,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct SelectOption {
 	pub(crate) id: String,
 	pub(crate) text: String,
@@ -325,32 +335,32 @@ pub(crate) struct SelectOption {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct SelectFieldProperty {
 	pub(crate) is_quick_add: bool,
 	pub(crate) options: Vec<SelectOption>,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct CreatedTimeFieldProperty {
 	pub(crate) format: String,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct ModifiedTimeFieldProperty {
 	pub(crate) format: String,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct ProgressFieldProperty {
 	pub(crate) decimal_places: i32,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct SingleSelectFieldProperty {
 	pub(crate) is_multiple: bool,
 	pub(crate) is_quick_add: bool,
@@ -358,7 +368,7 @@ pub(crate) struct SingleSelectFieldProperty {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct ReferenceFieldProperty {
 	/// 关联的子表id，为空时，表示关联本子表
 	pub(crate) sub_id: String,
@@ -368,13 +378,13 @@ pub(crate) struct ReferenceFieldProperty {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct LocationFieldProperty {
 	pub(crate) input_type: String,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct NumberRule {
 	#[serde(rename = "type")]
 	pub(crate) rule_type: String,
@@ -382,7 +392,7 @@ pub(crate) struct NumberRule {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct AutoNumberFieldProperty {
 	#[serde(rename = "type")]
 	pub(crate) auto_type: String,
@@ -391,7 +401,7 @@ pub(crate) struct AutoNumberFieldProperty {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct CurrencyFieldProperty {
 	pub(crate) currency_type: String,
 	pub(crate) decimal_places: i32,
@@ -399,13 +409,13 @@ pub(crate) struct CurrencyFieldProperty {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct WwGroupFieldProperty {
 	pub(crate) allow_multiple: bool,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Serialize, serde:: Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct Field {
 	pub(crate) field_id: String,
 	pub(crate) field_title: String,
@@ -516,7 +526,7 @@ impl super::super::index::WeixinWork {
 		&self,
 		docid: &str,
 		sheet_id: &str,
-		fields: &Vec<AddField>,
+		fields: &[AddField],
 	) {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
@@ -562,7 +572,7 @@ impl super::super::index::WeixinWork {
 		&self,
 		docid: &str,
 		sheet_id: &str,
-		fields: &Vec<Field>,
+		fields: &[Field],
 	) {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
@@ -607,7 +617,7 @@ impl super::super::index::WeixinWork {
 		&self,
 		docid: &str,
 		sheet_id: &str,
-		field_ids: &Vec<String>,
+		field_ids: &[String],
 	) {
 		assert!(docid.is_empty() == false, "doc_id could not be empty");
 		assert!(sheet_id.is_empty() == false, "sheet_id could not be empty");
