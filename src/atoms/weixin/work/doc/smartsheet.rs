@@ -113,7 +113,7 @@ impl super::super::index::WeixinWork {
 			.await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
-		log::debug!("add sheet record result: {:?}", ret);
+		log::debug!("add sheet record result: {:?}, {:#?}", ret, records);
 		let ret = serde_json::from_str::<AddSheetRecordResult>(&ret).unwrap();
 		log::debug!("add records result: {:?}", ret);
 		assert!(ret.errcode == 0, "failed to add records: {}", ret.errmsg);
@@ -238,7 +238,7 @@ impl super::super::index::WeixinWork {
 			.await
 			.unwrap();
 		let ret = ret.text().await.unwrap();
-		log::debug!("update records result: {:?}", ret);
+		log::debug!("update records result: {:#?} == {:#?}", ret, records);
 		let ret = serde_json::from_str::<UpdateSheetRecordResult>(&ret).unwrap();
 		log::debug!("update records result: {:?}", ret);
 		assert!(ret.errcode == 0, "failed to update records: {}", ret.errmsg);

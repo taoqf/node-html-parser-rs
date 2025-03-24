@@ -178,6 +178,15 @@ pub(crate) struct CellLocationValue {
 	title: String,
 }
 
+#[allow(dead_code)]
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+pub(crate) struct CellTwoWayLinkRecordsValue {
+	format: serde_json::Value, // todo 没有值
+	text: String,
+	#[serde(rename = "type")]
+	text_type: String,
+}
+
 #[derive(Debug)]
 pub(crate) struct CellAutoNumberValue {
 	/// 序号
@@ -219,6 +228,8 @@ pub(crate) enum CellValue {
 	FieldTypeLocation(Option<CellLocationValue>),
 	/// 关联(FIELD_TYPE_REFERENCE)	string []	关联的记录id
 	FieldTypeReference(Vec<String>),
+	/// 双向关联(FIELD_TYPE_TWO_WAY_LINK)	Object[](CellTwoWayLinkRecordsValue)
+	FieldTypeTwoWayLinkRecords(Vec<CellTwoWayLinkRecordsValue>),
 	/// 货币(FIELD_TYPE_CURRENCY)	double
 	FieldTypeCurrency(f64),
 	/// 自动编号(FIELD_TYPE_AUTONUMBER)	Object[](CellAutoNumberValue)
@@ -237,278 +248,320 @@ impl super::super::index::WeixinWork {
 		let values = values
 			.iter()
 			.map(|(key, val)| {
-				let field = fields.get(key).unwrap();
-				log::debug!("00000000000000000000000000000{}:{:#?}", key, val);
-				let value = match field.field_type.as_str() {
-					// 文本
-					"FIELD_TYPE_TEXT" => {
-						let val = match val.as_array() {
-							Some(val) => val,
-							None => &vec![],
-						};
-						let val = match val.len() {
-							0 => CellValue::FieldTypeText(CellTextValue::Text("".to_string())),
-							_ => {
-								let v = &val[0];
-								let val_type = get_safe_str(v, "type");
-								let val = match val_type.as_str() {
-									"url" => {
-										let link = get_safe_str(v, "link");
-										let text = get_safe_str(v, "text");
-										let val = (text, link);
-										CellValue::FieldTypeText(CellTextValue::Url(val))
-									}
-									#[allow(unreachable_patterns)]
-									_ | "text" => {
-										let val = v.get("text").unwrap();
-										CellValue::FieldTypeText(CellTextValue::Text(
-											val.as_str().unwrap().to_string(),
-										))
+				match fields.get(key) {
+					None => {
+						log::debug!(
+							"111111111111111111111111111{}:{:#?}=={:#?}",
+							key,
+							val,
+							fields
+						);
+						(key.to_owned(), CellValue::FieldTypeUnknown)
+					}
+					Some(field) => {
+						log::debug!(
+							"00000000000000000000000000000{}:{:#?}=={:#?}",
+							key,
+							val,
+							field
+						);
+						let value = match field.field_type.as_str() {
+							// 文本
+							"FIELD_TYPE_TEXT" => {
+								let val = match val.as_array() {
+									Some(val) => val,
+									None => &vec![],
+								};
+								let val = match val.len() {
+									0 => CellValue::FieldTypeText(CellTextValue::Text(
+										"".to_string(),
+									)),
+									_ => {
+										let v = &val[0];
+										let val_type = get_safe_str(v, "type");
+										let val = match val_type.as_str() {
+											"url" => {
+												let link = get_safe_str(v, "link");
+												let text = get_safe_str(v, "text");
+												let val = (text, link);
+												CellValue::FieldTypeText(CellTextValue::Url(val))
+											}
+											#[allow(unreachable_patterns)]
+											_ | "text" => {
+												let val = v.get("text").unwrap();
+												CellValue::FieldTypeText(CellTextValue::Text(
+													val.as_str().unwrap().to_string(),
+												))
+											}
+										};
+										val
 									}
 								};
 								val
 							}
-						};
-						val
-					}
-					// 数字
-					"FIELD_TYPE_NUMBER" => {
-						let val = match val.as_f64() {
-							Some(val) => CellValue::FieldTypeNumber(val),
-							None => CellValue::FieldTypeNumber(0.0),
-						};
-						val
-					}
-					// 复选框
-					"FIELD_TYPE_CHECKBOX" => {
-						let val = match val.as_bool() {
-							Some(val) => val,
-							None => false,
-						};
-						CellValue::FieldTypeCheckbox(val)
-					}
-					// 日期
-					"FIELD_TYPE_DATE_TIME" => {
-						let val = val2str(val);
-						let val = match val.parse() {
-							Ok(val) => val,
-							Err(_) => 0,
-						};
-						CellValue::FieldTypeDateTime(val)
-					}
-					// 图片
-					"FIELD_TYPE_IMAGE" => {
-						let val = val.as_array();
-						let imgs = match val {
-							Some(val) => val,
-							None => &vec![],
-						};
-						let imgs = imgs
-							.iter()
-							.map(|img| {
-								let height = get_safe_u64(img, "height") as i32;
-								let width = get_safe_u64(img, "width") as i32;
-								let id = get_safe_str(img, "id");
-								let title = get_safe_str(img, "title");
-								let image_url = get_safe_str(img, "image_url");
-								CellImageValue {
-									height,
-									width,
-									id,
-									title,
-									image_url,
-								}
-							})
-							.collect();
-						CellValue::FieldTypeImage(imgs)
-					}
-					// 文件
-					"FIELD_TYPE_ATTACHMENT" => {
-						let atts = match val.as_array() {
-							None => &vec![],
-							Some(val) => val,
-						};
-						let atts = atts
-							.iter()
-							.map(|it| {
-								let it = it.as_object().unwrap();
-								let name = it.get("name").unwrap().as_str().unwrap().to_owned();
-								let size = it.get("size").unwrap().as_i64().unwrap() as i32;
-								let file_ext =
-									it.get("file_ext").unwrap().as_str().unwrap().to_owned();
-								let file_url =
-									it.get("file_url").unwrap().as_str().unwrap().to_owned();
-								let file_type = it.get("file_type").unwrap().as_str().unwrap();
-								let file_type = match file_type {
-									"Folder" => CellAttachmentFileType::Folder,
-									"Wedrive" => CellAttachmentFileType::Wedrive,
-									"Collect" => CellAttachmentFileType::Collect,
-									"Doc" => CellAttachmentFileType::Doc,
-									"Sheet" => CellAttachmentFileType::Sheet,
-									"52" => CellAttachmentFileType::PPT,
-									"54" => CellAttachmentFileType::MindMap,
-									"55" => CellAttachmentFileType::Flow,
-									#[allow(unreachable_patterns)]
-									_ | "70" => CellAttachmentFileType::SmartSheet,
+							// 数字
+							"FIELD_TYPE_NUMBER" => {
+								let val = match val.as_f64() {
+									Some(val) => CellValue::FieldTypeNumber(val),
+									None => CellValue::FieldTypeNumber(0.0),
 								};
-								let doc_type = it.get("doc_type").unwrap().as_str().unwrap();
-								let doc_type = match doc_type {
-									"1" => CellAttachmentDocType::Folder,
-									#[allow(unreachable_patterns)]
-									_ | "2" => CellAttachmentDocType::File,
+								val
+							}
+							// 复选框
+							"FIELD_TYPE_CHECKBOX" => {
+								let val = match val.as_bool() {
+									Some(val) => val,
+									None => false,
 								};
+								CellValue::FieldTypeCheckbox(val)
+							}
+							// 日期
+							"FIELD_TYPE_DATE_TIME" => {
+								let val = val2str(val);
+								let val = match val.parse() {
+									Ok(val) => val,
+									Err(_) => 0,
+								};
+								CellValue::FieldTypeDateTime(val)
+							}
+							// 图片
+							"FIELD_TYPE_IMAGE" => {
+								let val = val.as_array();
+								let imgs = match val {
+									Some(val) => val,
+									None => &vec![],
+								};
+								let imgs = imgs
+									.iter()
+									.map(|img| {
+										let height = get_safe_u64(img, "height") as i32;
+										let width = get_safe_u64(img, "width") as i32;
+										let id = get_safe_str(img, "id");
+										let title = get_safe_str(img, "title");
+										let image_url = get_safe_str(img, "image_url");
+										CellImageValue {
+											height,
+											width,
+											id,
+											title,
+											image_url,
+										}
+									})
+									.collect();
+								CellValue::FieldTypeImage(imgs)
+							}
+							// 文件
+							"FIELD_TYPE_ATTACHMENT" => {
+								let atts = match val.as_array() {
+									None => &vec![],
+									Some(val) => val,
+								};
+								let atts = atts
+									.iter()
+									.map(|it| {
+										let it = it.as_object().unwrap();
+										let name =
+											it.get("name").unwrap().as_str().unwrap().to_owned();
+										let size = it.get("size").unwrap().as_i64().unwrap() as i32;
+										let file_ext = it
+											.get("file_ext")
+											.unwrap()
+											.as_str()
+											.unwrap()
+											.to_owned();
+										let file_url = it
+											.get("file_url")
+											.unwrap()
+											.as_str()
+											.unwrap()
+											.to_owned();
+										let file_type =
+											it.get("file_type").unwrap().as_str().unwrap();
+										let file_type = match file_type {
+											"Folder" => CellAttachmentFileType::Folder,
+											"Wedrive" => CellAttachmentFileType::Wedrive,
+											"Collect" => CellAttachmentFileType::Collect,
+											"Doc" => CellAttachmentFileType::Doc,
+											"Sheet" => CellAttachmentFileType::Sheet,
+											"52" => CellAttachmentFileType::PPT,
+											"54" => CellAttachmentFileType::MindMap,
+											"55" => CellAttachmentFileType::Flow,
+											#[allow(unreachable_patterns)]
+											_ | "70" => CellAttachmentFileType::SmartSheet,
+										};
+										let doc_type =
+											it.get("doc_type").unwrap().as_str().unwrap();
+										let doc_type = match doc_type {
+											"1" => CellAttachmentDocType::Folder,
+											#[allow(unreachable_patterns)]
+											_ | "2" => CellAttachmentDocType::File,
+										};
 
-								CellAttachmentValue {
-									name,
-									size,
-									file_ext,
-									file_url,
-									file_type,
-									doc_type,
+										CellAttachmentValue {
+											name,
+											size,
+											file_ext,
+											file_url,
+											file_type,
+											doc_type,
+										}
+									})
+									.collect::<Vec<_>>();
+								CellValue::FieldTypeAttachment(atts)
+							}
+							// 成员
+							"FIELD_TYPE_USER" => {
+								let users = match val.as_array() {
+									Some(v) => v,
+									None => &vec![],
+								};
+								let users = users
+									.iter()
+									.map(|it| serde_json::from_value(it.clone()).unwrap())
+									.collect::<Vec<_>>();
+								CellValue::FieldTypeUser(users)
+							}
+							// 超链接
+							"FIELD_TYPE_URL" => {
+								let urls = match val.as_array() {
+									Some(v) => v,
+									None => &vec![],
+								};
+								let urls = urls
+									.iter()
+									.map(|it| serde_json::from_value(it.clone()).unwrap())
+									.collect::<Vec<_>>();
+								CellValue::FieldTypeUrl(urls)
+							}
+							// 多选
+							"FIELD_TYPE_SELECT" => {
+								let vals = match val.as_array() {
+									Some(v) => v,
+									None => &vec![],
+								};
+								let vals = vals
+									.iter()
+									.map(|v| {
+										let id = get_safe_str(v, "id");
+										let text = get_safe_str(v, "text");
+										let style = get_safe_u64(v, "style");
+										let style = get_text_style(style);
+										OptionValue { id, text, style }
+									})
+									.collect::<Vec<_>>();
+								CellValue::FieldTypeSelect(vals)
+							}
+							// 创建人
+							// "FIELD_TYPE_CREATED_USER" => {}
+							// 最后编辑人
+							// "FIELD_TYPE_MODIFIED_USER" => {}
+							// 创建时间
+							// "FIELD_TYPE_CREATED_TIME" => {}
+							// 最后编辑时间
+							// "FIELD_TYPE_MODIFIED_TIME" => {}
+							// 进度
+							"FIELD_TYPE_PROGRESS" => {
+								let val = val2f64(val);
+								CellValue::FieldTypeProgress(val)
+							}
+							// 电话
+							"FIELD_TYPE_PHONE_NUMBER" => {
+								let val = val2str(val);
+								CellValue::FieldTypePhoneNumber(val)
+							}
+							// 邮件
+							"FIELD_TYPE_EMAIL" => {
+								let val = val2str(val);
+								CellValue::FieldTypeEmail(val)
+							}
+							// 单选
+							"FIELD_TYPE_SINGLE_SELECT" => {
+								let vals = match val.as_array() {
+									Some(v) => v,
+									None => &vec![],
+								};
+								let val = if vals.len() == 0 {
+									None
+								} else {
+									let v = &vals[0];
+									let id = get_safe_str(v, "id");
+									let text = get_safe_str(v, "text");
+									let style = get_safe_u64(v, "style");
+									let style = get_text_style(style);
+									Some(OptionValue { id, text, style })
+								};
+								CellValue::FieldTypeSingleSelect(val)
+							}
+							// 关联1--文档
+							"FIELD_TYPE_REFERENCE" => {
+								log::debug!("fffffffffrrrrrrrrrrrrrrrr:{}", val);
+								let vals = serde_json::from_value(val.clone()).unwrap();
+								CellValue::FieldTypeReference(vals)
+							}
+							// 关联2--实际测试
+							"FIELD_TYPE_TWOWAYLINKRECORDS" => {
+								let vals = serde_json::from_value(val.clone());
+								match vals {
+									Ok(vals) => CellValue::FieldTypeTwoWayLinkRecords(vals),
+									Err(..) => {
+										let vals = serde_json::from_value(val.clone()).unwrap();
+										CellValue::FieldTypeReference(vals)
+									}
 								}
-							})
-							.collect::<Vec<_>>();
-						CellValue::FieldTypeAttachment(atts)
-					}
-					// 成员
-					"FIELD_TYPE_USER" => {
-						let users = match val.as_array() {
-							Some(v) => v,
-							None => &vec![],
+							}
+							// 地理位置
+							"FIELD_TYPE_LOCATION" => {
+								let vals = val.as_array();
+								let vals = match vals {
+									Some(v) => v,
+									None => &vec![],
+								};
+								let val = if vals.len() == 0 {
+									None
+								} else {
+									let v = &vals[0];
+									let id = get_safe_str(v, "id");
+									let title = get_safe_str(v, "title");
+									let source_type = CellLocationSourceType::Tencent; // 文档中介绍，只支持腾讯地图
+									let latitude = get_safe_str(v, "latitude");
+									let longitude = get_safe_str(v, "longitude");
+									Some(CellLocationValue {
+										id,
+										source_type,
+										latitude,
+										longitude,
+										title,
+									})
+								};
+								CellValue::FieldTypeLocation(val)
+							}
+							// 公式
+							// "FIELD_TYPE_FORMULA" => {}
+							// 货币
+							"FIELD_TYPE_CURRENCY" => {
+								let val = val2f64(val);
+								CellValue::FieldTypeCurrency(val)
+							}
+							// 群
+							// "FIELD_TYPE_WWGROUP" => {}
+							// 自动编号
+							"FIELD_TYPE_AUTONUMBER" => {
+								let seq = get_safe_str(val, "seq");
+								let text = get_safe_str(val, "text");
+								CellValue::FieldTypeAutonumber(CellAutoNumberValue {
+									seq: seq.to_owned(),
+									text: text.to_owned(),
+								})
+							}
+							#[allow(unreachable_patterns)]
+							_ => {
+								log::error!("Unknow field type: {}{}{:#?}", key, val, field);
+								CellValue::FieldTypeUnknown
+							}
 						};
-						let users = users
-							.iter()
-							.map(|it| serde_json::from_value(it.clone()).unwrap())
-							.collect::<Vec<_>>();
-						CellValue::FieldTypeUser(users)
+						(key.to_owned(), value)
 					}
-					// 超链接
-					"FIELD_TYPE_URL" => {
-						let urls = match val.as_array() {
-							Some(v) => v,
-							None => &vec![],
-						};
-						let urls = urls
-							.iter()
-							.map(|it| serde_json::from_value(it.clone()).unwrap())
-							.collect::<Vec<_>>();
-						CellValue::FieldTypeUrl(urls)
-					}
-					// 多选
-					"FIELD_TYPE_SELECT" => {
-						let vals = match val.as_array() {
-							Some(v) => v,
-							None => &vec![],
-						};
-						let vals = vals
-							.iter()
-							.map(|v| {
-								let id = get_safe_str(v, "id");
-								let text = get_safe_str(v, "text");
-								let style = get_safe_u64(v, "style");
-								let style = get_text_style(style);
-								OptionValue { id, text, style }
-							})
-							.collect::<Vec<_>>();
-						CellValue::FieldTypeSelect(vals)
-					}
-					// 创建人
-					// "FIELD_TYPE_CREATED_USER" => {}
-					// 最后编辑人
-					// "FIELD_TYPE_MODIFIED_USER" => {}
-					// 创建时间
-					// "FIELD_TYPE_CREATED_TIME" => {}
-					// 最后编辑时间
-					// "FIELD_TYPE_MODIFIED_TIME" => {}
-					// 进度
-					"FIELD_TYPE_PROGRESS" => {
-						let val = val2f64(val);
-						CellValue::FieldTypeProgress(val)
-					}
-					// 电话
-					"FIELD_TYPE_PHONE_NUMBER" => {
-						let val = val2str(val);
-						CellValue::FieldTypePhoneNumber(val)
-					}
-					// 邮件
-					"FIELD_TYPE_EMAIL" => {
-						let val = val2str(val);
-						CellValue::FieldTypeEmail(val)
-					}
-					// 单选
-					"FIELD_TYPE_SINGLE_SELECT" => {
-						let vals = match val.as_array() {
-							Some(v) => v,
-							None => &vec![],
-						};
-						let val = if vals.len() == 0 {
-							None
-						} else {
-							let v = &vals[0];
-							let id = get_safe_str(v, "id");
-							let text = get_safe_str(v, "text");
-							let style = get_safe_u64(v, "style");
-							let style = get_text_style(style);
-							Some(OptionValue { id, text, style })
-						};
-						CellValue::FieldTypeSingleSelect(val)
-					}
-					// 关联
-					"FIELD_TYPE_REFERENCE" | "FIELD_TYPE_TWOWAYLINKRECORDS" => {
-						let vals = serde_json::from_value(val.clone()).unwrap();
-						CellValue::FieldTypeReference(vals)
-					}
-					// 地理位置
-					"FIELD_TYPE_LOCATION" => {
-						let vals = val.as_array();
-						let vals = match vals {
-							Some(v) => v,
-							None => &vec![],
-						};
-						let val = if vals.len() == 0 {
-							None
-						} else {
-							let v = &vals[0];
-							let id = get_safe_str(v, "id");
-							let title = get_safe_str(v, "title");
-							let source_type = CellLocationSourceType::Tencent; // 文档中介绍，只支持腾讯地图
-							let latitude = get_safe_str(v, "latitude");
-							let longitude = get_safe_str(v, "longitude");
-							Some(CellLocationValue {
-								id,
-								source_type,
-								latitude,
-								longitude,
-								title,
-							})
-						};
-						CellValue::FieldTypeLocation(val)
-					}
-					// 公式
-					// "FIELD_TYPE_FORMULA" => {}
-					// 货币
-					"FIELD_TYPE_CURRENCY" => {
-						let val = val2f64(val);
-						CellValue::FieldTypeCurrency(val)
-					}
-					// 群
-					// "FIELD_TYPE_WWGROUP" => {}
-					// 自动编号
-					"FIELD_TYPE_AUTONUMBER" => {
-						let seq = get_safe_str(val, "seq");
-						let text = get_safe_str(val, "text");
-						CellValue::FieldTypeAutonumber(CellAutoNumberValue {
-							seq: seq.to_owned(),
-							text: text.to_owned(),
-						})
-					}
-					#[allow(unreachable_patterns)]
-					_ => {
-						log::error!("Unknow field type: {}{}{:#?}", key, val, field);
-						CellValue::FieldTypeUnknown
-					}
-				};
-				(key.to_owned(), value)
+				}
 			})
 			.collect::<HashMap<_, _>>();
 		return values;
@@ -747,6 +800,18 @@ impl super::super::index::WeixinWork {
 							.map(|val| serde_json::to_value(val).unwrap())
 							.collect(),
 					),
+					// 双向关联
+					CellValue::FieldTypeTwoWayLinkRecords(vals) => serde_json::Value::Array(
+						vals.iter()
+							.map(|val| {
+								serde_json::json!({
+									// "format": {},
+									"text": val.text,
+									"type": val.text_type,
+								})
+							})
+							.collect(),
+					),
 					// 地理位置
 					CellValue::FieldTypeLocation(val) => match val {
 						Some(val) => serde_json::Value::Array(vec![serde_json::json!({
@@ -767,7 +832,7 @@ impl super::super::index::WeixinWork {
 						"seq": val.seq,
 						"text": val.text,
 					}),
-					_ => serde_json::Value::Null,
+					_ => serde_json::json!(null),
 				};
 				let mut json = serde_json::map::Map::new();
 				json.insert(key.to_string(), val);
@@ -776,6 +841,294 @@ impl super::super::index::WeixinWork {
 			.collect::<Vec<_>>();
 		let values = serde_json::Value::Array(values);
 		return values;
+	}
+}
+
+#[allow(dead_code)]
+impl super::super::index::WeixinWork {
+	/// 数据对象转换为json对象
+	pub(crate) fn record_obj2val_by_type(
+		&self,
+		values: &HashMap<&str, &CellValue>,
+		fields: &HashMap<String, Field>,
+	) -> serde_json::Value {
+		let values = values
+			.iter()
+			.map(|(key, val)| {
+				let key = key.to_string();
+				match fields.get(&key) {
+					None => {
+						log::debug!(
+							"11111111111111111111111111111{}:{:#?}=={:#?}",
+							key,
+							val,
+							fields
+						);
+						(key, serde_json::json!(null))
+					}
+					Some(field) => {
+						log::debug!(
+							"00000000000000000000000000000{}:{:#?}=={:#?}",
+							key,
+							val,
+							field
+						);
+						let val = match field.field_type.as_str() {
+							// 文本
+							"FIELD_TYPE_TEXT" => {
+								let val = self.record_val2str(val);
+								serde_json::json!([{
+									"type": "text",
+									"text": val,
+									"link": ""
+								}])
+							}
+							// 数字
+							"FIELD_TYPE_NUMBER" => {
+								let val = self.record_val2f64(val);
+								serde_json::json!(val)
+							}
+							// 复选框
+							"FIELD_TYPE_CHECKBOX" => {
+								let val = self.record_val2bool(val);
+								serde_json::json!(val)
+							}
+							// 日期
+							"FIELD_TYPE_DATE_TIME" => {
+								let val = self.record_val2f64(val) as i64;
+								serde_json::json!(val.to_string())
+							}
+							// 图片
+							"FIELD_TYPE_IMAGE" => {
+								let val = match val {
+									CellValue::FieldTypeImage(vals) => vals
+										.iter()
+										.map(|val| {
+											serde_json::json!({
+												"id": val.id,
+												"title": val.title,
+												"image_url": val.image_url,
+												"width": val.width,
+												"height": val.height,
+											})
+										})
+										.collect::<Vec<_>>(),
+									_ => vec![],
+								};
+								serde_json::json!(val)
+							}
+							// 文件
+							"FIELD_TYPE_ATTACHMENT" => {
+								let val = match val {
+									CellValue::FieldTypeAttachment(vals) => vals
+										.iter()
+										.map(|val| {
+											let file_type = match val.file_type {
+												CellAttachmentFileType::Folder => "Folder",
+												CellAttachmentFileType::Wedrive => "Wedrive",
+												CellAttachmentFileType::Collect => "30",
+												CellAttachmentFileType::Doc => "50",
+												CellAttachmentFileType::Sheet => "51",
+												CellAttachmentFileType::PPT => "52",
+												CellAttachmentFileType::MindMap => "54",
+												CellAttachmentFileType::Flow => "55",
+												CellAttachmentFileType::SmartSheet => "70",
+											};
+											let doc_type = match val.doc_type {
+												CellAttachmentDocType::Folder => 1,
+												CellAttachmentDocType::File => 2,
+											};
+											serde_json::json!({
+												"name": val.name,
+												"size": val.size,
+												"file_ext": val.file_ext,
+												"file_type": file_type,
+												"doc_type": doc_type,
+											})
+										})
+										.collect::<Vec<_>>(),
+									_ => vec![],
+								};
+								serde_json::json!(val)
+							}
+							// 成员
+							"FIELD_TYPE_USER" => {
+								let val = match val {
+									CellValue::FieldTypeUser(vals) => vals
+										.iter()
+										.map(|val| {
+											serde_json::json!({
+												"user_id": val.user_id,
+												"tmp_external_userid": val.tmp_external_userid,
+											})
+										})
+										.collect::<Vec<_>>(),
+									_ => vec![],
+								};
+								serde_json::json!(val)
+							}
+							// 超链接
+							"FIELD_TYPE_URL" => {
+								let val = match val {
+									CellValue::FieldTypeUrl(vals) => vals
+										.iter()
+										.map(|val| {
+											serde_json::json!({
+												"type": val.value_type,
+												"text": val.text,
+												"link": val.link,
+											})
+										})
+										.collect::<Vec<_>>(),
+									_ => vec![],
+								};
+								serde_json::json!(val)
+							}
+							// 多选
+							"FIELD_TYPE_SELECT" => {
+								let val = match val {
+									CellValue::FieldTypeSelect(vals) => vals
+										.iter()
+										.map(|val| {
+											let style = get_text_style_num(&val.style);
+											serde_json::json!({
+												// "id": val.id,
+												"text": val.text,
+												"style": style
+											})
+										})
+										.collect::<Vec<_>>(),
+									_ => vec![],
+								};
+								serde_json::json!(val)
+							}
+							// 创建人
+							// "FIELD_TYPE_CREATED_USER" => {}
+							// 最后编辑人
+							// "FIELD_TYPE_MODIFIED_USER" => {}
+							// 创建时间
+							// "FIELD_TYPE_CREATED_TIME" => {}
+							// 最后编辑时间
+							// "FIELD_TYPE_MODIFIED_TIME" => {}
+							// 进度
+							"FIELD_TYPE_PROGRESS" => {
+								let val = match val {
+									CellValue::FieldTypeProgress(val) => *val,
+									_ => 0.0,
+								};
+								serde_json::json!(val)
+							}
+							// 电话
+							"FIELD_TYPE_PHONE_NUMBER" => {
+								let val = match val {
+									CellValue::FieldTypePhoneNumber(val) => val,
+									_ => "",
+								};
+								serde_json::json!(val)
+							}
+							// 邮件
+							"FIELD_TYPE_EMAIL" => {
+								let val = match val {
+									CellValue::FieldTypeEmail(val) => val,
+									_ => "",
+								};
+								serde_json::json!(val)
+							}
+							// 单选
+							"FIELD_TYPE_SINGLE_SELECT" => {
+								let val = match val {
+									CellValue::FieldTypeSingleSelect(val) => match val {
+										Some(val) => {
+											let style = get_text_style_num(&val.style);
+											vec![serde_json::json!({
+												// "id": val.id,
+												"text": val.text,
+												"style": style,
+											})]
+										}
+										None => {
+											vec![]
+										}
+									},
+									_ => vec![],
+								};
+								serde_json::json!(val)
+							}
+							// 关联1--文档
+							"FIELD_TYPE_REFERENCE" => {
+								let val = match val {
+									CellValue::FieldTypeReference(val) => val,
+									_ => &vec![],
+								};
+								serde_json::json!(val)
+							}
+							// 关联2--实际测试
+							"FIELD_TYPE_TWOWAYLINKRECORDS" => {
+								let val = match val {
+									CellValue::FieldTypeReference(val) => serde_json::json!(val),
+									CellValue::FieldTypeTwoWayLinkRecords(val) => {
+										serde_json::json!(val)
+									}
+									_ => serde_json::json!([]),
+								};
+								serde_json::json!(val)
+							}
+							// 地理位置
+							"FIELD_TYPE_LOCATION" => {
+								let val = match val {
+									CellValue::FieldTypeLocation(vals) => vals
+										.iter()
+										.map(|val| {
+											let source_type = 1; // 文档中介绍，只支持腾讯地图
+											serde_json::json!({
+												"id": val.id,
+												"title": val.title,
+												"source_type": source_type,
+												"latitude": val.latitude,
+												"longitude": val.title,
+											})
+										})
+										.collect::<Vec<_>>(),
+									_ => vec![],
+								};
+								serde_json::json!(val)
+							}
+							// 公式
+							// "FIELD_TYPE_FORMULA" => {}
+							// 货币
+							"FIELD_TYPE_CURRENCY" => {
+								let val = match val {
+									CellValue::FieldTypeCurrency(val) => val,
+									_ => &0.0,
+								};
+								serde_json::json!(val)
+							}
+							// 群
+							// "FIELD_TYPE_WWGROUP" => {}
+							// 自动编号
+							"FIELD_TYPE_AUTONUMBER" => {
+								let val = match val {
+									CellValue::FieldTypeAutonumber(val) => serde_json::json!({
+										"seq": val.seq,
+										"text": val.text,
+									}),
+									_ => serde_json::json!(null),
+								};
+								serde_json::json!(val)
+							}
+							#[allow(unreachable_patterns)]
+							_ => {
+								log::error!("Unknow field type: {}{:#?}{:#?}", key, val, field);
+								serde_json::json!(null)
+							}
+						};
+						(key, val)
+					}
+				}
+			})
+			.collect::<serde_json::Map<_, _>>();
+
+		return serde_json::json!(values);
 	}
 }
 
@@ -881,6 +1234,14 @@ impl super::super::index::WeixinWork {
 					return "".to_owned();
 				}
 			}
+			// 双向关联
+			CellValue::FieldTypeTwoWayLinkRecords(vals) => {
+				if let Some(val) = vals.get(0) {
+					val.text.clone()
+				} else {
+					return "".to_owned();
+				}
+			}
 			// 地理位置
 			CellValue::FieldTypeLocation(val) => match val {
 				Some(val) => val.title.to_string(),
@@ -955,6 +1316,8 @@ impl super::super::index::WeixinWork {
 			},
 			// 关联
 			CellValue::FieldTypeReference(_vals) => 0.0,
+			// 双向关联
+			CellValue::FieldTypeTwoWayLinkRecords(_vals) => 0.0,
 			// 地理位置
 			CellValue::FieldTypeLocation(val) => match val {
 				Some(val) => match val.title.parse() {
@@ -1022,7 +1385,11 @@ impl super::super::index::WeixinWork {
 				None => vec![],
 			},
 			// 关联
-			CellValue::FieldTypeReference(_vals) => vec![],
+			CellValue::FieldTypeReference(vals) => vals.iter().map(|r| r.to_string()).collect(),
+			// 双向关联
+			CellValue::FieldTypeTwoWayLinkRecords(vals) => {
+				vals.iter().map(|r| r.text.to_owned()).collect()
+			}
 			// 地理位置
 			CellValue::FieldTypeLocation(val) => match val {
 				Some(val) => vec![val.title.to_owned()],
@@ -1079,6 +1446,8 @@ impl super::super::index::WeixinWork {
 			CellValue::FieldTypeSingleSelect(val) => val.is_some(),
 			// 关联
 			CellValue::FieldTypeReference(vals) => vals.is_empty(),
+			// 双向关联
+			CellValue::FieldTypeTwoWayLinkRecords(vals) => vals.is_empty(),
 			// 地理位置
 			CellValue::FieldTypeLocation(val) => val.is_some(),
 			// 公式
@@ -1361,6 +1730,37 @@ impl super::super::index::WeixinWork {
 					Some(val) => val.to_owned(),
 					None => "".to_owned(),
 				};
+				let val_compares = match compared_value.as_array() {
+					Some(v) => v
+						.iter()
+						.map(|v| {
+							let v = v.get("text").unwrap();
+							let v = v.as_str().unwrap();
+							v.to_owned()
+						})
+						.collect::<Vec<_>>(),
+					None => vec![],
+				};
+				let val_compare = match val_compares.get(0) {
+					Some(val) => val.to_owned(),
+					None => "".to_owned(),
+				};
+				match op {
+					CompareType::Eq => val == val_compare,
+					CompareType::Neq => val != val_compare,
+					CompareType::Gt => val > val_compare,
+					CompareType::Gte => val >= val_compare,
+					CompareType::Lt => val < val_compare,
+					CompareType::Lte => val <= val_compare,
+					CompareType::In => val_compares.contains(&val),
+				}
+			}
+			// 双向关联
+			CellValue::FieldTypeTwoWayLinkRecords(vals) => {
+				let val = match vals.get(0) {
+					Some(val) => val.text.to_owned(),
+					None => "".to_owned(),
+				};
 				let val_compares = val2arr(compared_value);
 				let val_compare = match val_compares.get(0) {
 					Some(val) => val.to_owned(),
@@ -1564,6 +1964,20 @@ impl super::super::index::WeixinWork {
 						val1.iter().enumerate().all(|(i, v1)| {
 							let v2 = &val2[i];
 							v1.eq(v2)
+						})
+					} else {
+						false
+					}
+				}
+				_ => false,
+			},
+			// 双向关联
+			CellValue::FieldTypeTwoWayLinkRecords(val1) => match value2 {
+				CellValue::FieldTypeTwoWayLinkRecords(val2) => {
+					if val1.len() == val2.len() {
+						val1.iter().enumerate().all(|(i, v1)| {
+							let v2 = &val2[i];
+							v1.text == v2.text && v1.text_type == v2.text_type
 						})
 					} else {
 						false
