@@ -19,6 +19,7 @@ pub(crate) enum DocType {
 // }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub(crate) struct Doc {
 	pub(crate) url: String,
 	pub(crate) docid: String,
@@ -30,9 +31,10 @@ impl super::super::index::WeixinWork {
 	/// @see https://developer.work.weixin.qq.com/document/path/97470
 	pub(crate) async fn doc_create(
 		&self,
+		spaceid: &str,
 		doc_type: DocType,
 		doc_name: &str,
-		admin_users: Vec<String>,
+		admin_users: &[&str],
 	) -> Doc {
 		assert!(doc_name.is_empty() == false, "docname could not be empty");
 		assert!(
@@ -51,11 +53,21 @@ impl super::super::index::WeixinWork {
 			"https://qyapi.weixin.qq.com/cgi-bin/wedoc/create_doc?access_token={}",
 			token.as_str()
 		);
-		let param = serde_json::json!({
-			"doc_type":doc_type as i32,
-			"doc_name":doc_name,
-			"admin_users":admin_users,
-		});
+		let param = if spaceid.is_empty() {
+			serde_json::json!({
+				"doc_type": doc_type as i32,
+				"doc_name": doc_name,
+				"admin_users": admin_users,
+			})
+		} else {
+			serde_json::json!({
+				"spaceid": spaceid,
+				"fatherid": spaceid,
+				"doc_type": doc_type as i32,
+				"doc_name": doc_name,
+				"admin_users": admin_users,
+			})
+		};
 		log::debug!("create doc param:{:#?}", param);
 		let client = reqwest::Client::new();
 		let ret = client.post(url.as_str()).json(&param).send().await.unwrap();

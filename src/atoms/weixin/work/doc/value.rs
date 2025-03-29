@@ -10,18 +10,18 @@ pub(crate) enum CellTextValue {
 	Url((String, String)),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct CellImageValue {
 	/// 图片 ID
-	id: String,
+	pub(crate) id: String,
 	/// 图片标题
-	title: String,
+	pub(crate) title: String,
 	/// 图片url
-	image_url: String,
+	pub(crate) image_url: String,
 	/// 图片宽度
-	width: i32,
+	pub(crate) width: i32,
 	/// 图片高度
-	height: i32,
+	pub(crate) height: i32,
 }
 
 #[derive(Debug, PartialEq)]
@@ -57,36 +57,36 @@ pub(crate) enum CellAttachmentDocType {
 #[derive(Debug)]
 pub(crate) struct CellAttachmentValue {
 	/// 文件名
-	name: String,
+	pub(crate) name: String,
 	/// 文件大小
-	size: i32,
+	pub(crate) size: i32,
 	/// 文件扩展名
-	file_ext: String,
+	pub(crate) file_ext: String,
 	/// 文件url
-	file_url: String,
-	/// 文件类型，文件夹为Folder，微盘文件为Wedrive，文件夹为Folder，微盘文件为Wedrive，收集表为30，文档为50，表格是51，幻灯片为52，思维导图为54，流程图为55，智能表为70
+	pub(crate) file_url: String,
+	/// 文件类型，文件夹为Folder，微盘文件为Wedrive，文件夹为Folder，微盘文件为Wedrive，收集表为30，文档为50，表格是51，幻灯片为52，思维导图为54，pub(crate) 流程图为55，智能表为70
 	file_type: CellAttachmentFileType,
 	/// 接口返回的文件类型，1为文件夹，2为文件
-	doc_type: CellAttachmentDocType,
+	pub(crate) doc_type: CellAttachmentDocType,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct CellUserValue {
 	/// 成员ID
-	user_id: Option<String>,
+	pub(crate) user_id: Option<String>,
 	/// 外部用户临时id，同一个用户在不同的智能表中返回的该id不一致。可进一步通过tmp_external_userid的转换接口转换成external_userid，方便识别外部用户的身份。
-	tmp_external_userid: Option<String>,
+	pub(crate) tmp_external_userid: Option<String>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct CellUrlValue {
 	/// 填url
 	#[serde(rename = "type")]
-	value_type: String,
+	pub(crate) value_type: String,
 	/// 链接显示文本
-	text: String,
+	pub(crate) text: String,
 	/// 链接跳转url
-	link: String,
+	pub(crate) link: String,
 }
 
 #[derive(Debug, PartialEq)]
@@ -150,11 +150,11 @@ pub(crate) enum OptionStyle {
 #[derive(Debug, PartialEq)]
 pub(crate) struct OptionValue {
 	/// 选项ID
-	id: String,
+	pub(crate) id: String,
 	/// 选项颜色
-	style: OptionStyle,
+	pub(crate) style: OptionStyle,
 	/// 选项内容
-	text: String,
+	pub(crate) text: String,
 }
 
 #[derive(Debug)]
@@ -167,32 +167,32 @@ pub(crate) enum CellLocationSourceType {
 #[derive(Debug)]
 pub(crate) struct CellLocationValue {
 	/// uint32	填1，表示来源为腾讯地图。目前只支持腾讯地图来源
-	source_type: CellLocationSourceType,
+	pub(crate) source_type: CellLocationSourceType,
 	/// 地点ID
-	id: String,
+	pub(crate) id: String,
 	/// 纬度
-	latitude: String,
+	pub(crate) latitude: String,
 	/// 经度
-	longitude: String,
+	pub(crate) longitude: String,
 	/// 地点名称
-	title: String,
+	pub(crate) title: String,
 }
 
 #[allow(dead_code)]
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub(crate) struct CellTwoWayLinkRecordsValue {
-	format: serde_json::Value, // todo 没有值
-	text: String,
+	pub(crate) format: serde_json::Value, // todo 没有值
+	pub(crate) text: String,
 	#[serde(rename = "type")]
-	text_type: String,
+	pub(crate) text_type: String,
 }
 
 #[derive(Debug)]
 pub(crate) struct CellAutoNumberValue {
 	/// 序号
-	seq: String,
+	pub(crate) seq: String,
 	/// 展示的文本
-	text: String,
+	pub(crate) text: String,
 }
 
 #[derive(Debug)]
@@ -390,11 +390,11 @@ impl super::super::index::WeixinWork {
 											_ | "70" => CellAttachmentFileType::SmartSheet,
 										};
 										let doc_type =
-											it.get("doc_type").unwrap().as_str().unwrap();
+											it.get("doc_type").unwrap().as_i64().unwrap();
 										let doc_type = match doc_type {
-											"1" => CellAttachmentDocType::Folder,
+											1 => CellAttachmentDocType::Folder,
 											#[allow(unreachable_patterns)]
-											_ | "2" => CellAttachmentDocType::File,
+											_ | 2 => CellAttachmentDocType::File,
 										};
 
 										CellAttachmentValue {
@@ -736,8 +736,8 @@ impl super::super::index::WeixinWork {
 									CellAttachmentFileType::SmartSheet => "70",
 								};
 								let doc_type = match file.doc_type {
-									CellAttachmentDocType::File => "2",
-									CellAttachmentDocType::Folder => "1",
+									CellAttachmentDocType::File => 2,
+									CellAttachmentDocType::Folder => 1,
 								};
 								serde_json::json!({
 									"file_type": file_type,

@@ -5,6 +5,10 @@ pub(crate) struct AppState {
 	// pub(crate) weixinwork: super::atoms::weixin::work::index::WeixinWork,
 	// pub(crate) weixin: super::atoms::weixin::weixin::index::Weixin,
 	pub(crate) pg: Box<dyn welds::Client>,
+	pub(crate) file_msg_encode_enable: bool,
+	pub(crate) file_server: String,
+	pub(crate) file_msg_encode_appid: String,
+	pub(crate) file_msg_encode_safe_key: String,
 }
 
 impl AppState {
@@ -15,6 +19,17 @@ impl AppState {
 		log::debug!("appsecret={}", appsecret);
 
 		let pg = crate::atoms::db::get_db("DB_PG").await;
+		let file_msg_encode_enable = std::env::var("FILE_MSG_ENCODE_ENABLE")
+			.unwrap()
+			.parse::<i32>()
+			.unwrap();
+		log::debug!("file_msg_encode_enable={}", file_msg_encode_enable);
+		let file_server = std::env::var("FILE_SERVER").unwrap();
+		log::debug!("file_server={}", file_server);
+		let file_msg_encode_appid = std::env::var("FILE_MSG_ENCODE_APPID").unwrap();
+		log::debug!("file_msg_encode_appid={}", file_msg_encode_appid);
+		let file_msg_encode_safe_key = std::env::var("FILE_MSG_ENCODE_SAFE_KEY").unwrap();
+		log::debug!("file_msg_encode_safe_key={}", file_msg_encode_safe_key);
 
 		// let weixinwork = crate::atoms::weixin::work::index::WeixinWork::new().await;
 		// let weixin = crate::atoms::weixin::weixin::index::Weixin::new().await;
@@ -25,6 +40,10 @@ impl AppState {
 			// weixin,
 			// weixinwork,
 			pg,
+			file_msg_encode_enable: file_msg_encode_enable == 1,
+			file_server,
+			file_msg_encode_appid,
+			file_msg_encode_safe_key,
 		};
 	}
 }

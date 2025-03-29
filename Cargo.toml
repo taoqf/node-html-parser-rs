@@ -18,6 +18,9 @@ rayon = "1.10.0"
 actix-web = "4.10.2"
 regex = "1.11.1"
 futures = "0.3.31"
+bytes = "1.10.1"
+md5 = "0.7.0"
+percent-encoding = "2.3.1"
 # diesel = { version = "2.2.6", features = ["postgres"] }
 
 # [dependencies.deadpool-tiberius]
@@ -38,7 +41,7 @@ features = ["rust_decimal"]
 
 [dependencies.reqwest]
 version = "0.12.14"
-features = ["json"]
+features = ["json", "multipart"]
 
 [dependencies.serde]
 version = "1.0"
