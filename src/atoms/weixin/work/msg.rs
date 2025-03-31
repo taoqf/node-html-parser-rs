@@ -65,12 +65,12 @@ impl super::index::WeixinWork {
 		struct WxApiResult {
 			errcode: i32,
 			errmsg: String,
-			invaliduser: String,
-			invalidparty: String,
-			invalidtag: String,
-			unlicenseduser: String,
+			// invaliduser: String,
+			// invalidparty: String,
+			// invalidtag: String,
+			// unlicenseduser: String,
 			msgid: String,
-			response_code: String,
+			// response_code: String,
 		}
 		let token = self.get_access_token().await;
 		let url = format!("{}?access_token={}", URL, token.as_str());
