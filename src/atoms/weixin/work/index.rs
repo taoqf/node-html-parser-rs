@@ -1,11 +1,11 @@
 #[allow(dead_code)]
 pub(crate) struct WeixinWork {
-	appid: String,
-	appsecret: String,
-	agent: u32,
-	db: Box<dyn welds::Client>,
-	get_token_url: String,
-	token_key: String,
+	pub(super) appid: String,
+	pub(super) appsecret: String,
+	pub(super) agent: u32,
+	pub(super) db: Box<dyn welds::Client>,
+	pub(super) get_token_url: String,
+	pub(super) token_key: String,
 }
 
 #[allow(dead_code)]
