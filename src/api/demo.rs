@@ -46,6 +46,8 @@ struct Param {
 #[actix_web::get("/test")]
 pub(crate) async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpResponse {
 	log::debug!("param = {}", data.data);
+	let state = crate::app_state::get_state().await;
+	log::debug!("state = {:#?}", state.appid);
 	return actix_web::HttpResponse::Ok().json(json!({
 		"data": 100,
 		"msg": "ok".to_owned(),
@@ -112,7 +114,6 @@ pub(crate) async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::H
 // #[actix_web::get("/db2")]
 // pub(crate) async fn db2(
 // 	_req: actix_web::HttpRequest,
-// 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
 // ) -> actix_web::HttpResponse {
 // 	type Table = crate::db::postgres::tb01sys::Tb01Sys;
 // 	let client = state.pg.as_ref();
@@ -134,7 +135,6 @@ pub(crate) async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::H
 // #[actix_web::get("/db3")]
 // pub(crate) async fn db3(
 // 	_req: actix_web::HttpRequest,
-// 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
 // ) -> actix_web::HttpResponse {
 // 	let mut client = state.mssql().await;
 // 	let stream = client

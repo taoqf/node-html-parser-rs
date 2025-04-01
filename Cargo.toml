@@ -21,6 +21,7 @@ futures = "0.3.31"
 bytes = "1.10.1"
 md5 = "0.7.0"
 percent-encoding = "2.3.1"
+lazy_static = "1.5.0"
 # diesel = { version = "2.2.6", features = ["postgres"] }
 
 # [dependencies.deadpool-tiberius]

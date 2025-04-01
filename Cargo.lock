@@ -871,6 +871,7 @@ dependencies = [
  "chrono",
  "dotenvy",
  "futures",
+ "lazy_static",
  "log",
  "log4rs",
  "md5 0.7.0",
