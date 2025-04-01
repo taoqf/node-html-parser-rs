@@ -3,6 +3,8 @@ mod app_state;
 mod atoms;
 mod db;
 
+pub(crate) use app_state::get_state;
+
 #[actix_web::main]
 async fn main() {
 	log4rs::init_file("./log4rs.yaml", Default::default()).expect("log4rs config not correct!");

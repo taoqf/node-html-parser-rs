@@ -9,12 +9,9 @@ pub(crate) struct UploadedFileInfo {
 }
 
 #[allow(dead_code)]
-pub(crate) async fn upload(
-	state: &std::sync::Arc<crate::app_state::AppState>,
-	file_content: bytes::Bytes,
-	file_name: &str,
-) -> UploadedFileInfo {
+pub(crate) async fn upload(file_content: bytes::Bytes, file_name: &str) -> UploadedFileInfo {
 	let client = reqwest::Client::new();
+	let state = crate::get_state().await;
 	let url = format!("{}/upload", &state.file_server);
 	let request = client.put(url);
 	let request = if state.file_msg_encode_enable {

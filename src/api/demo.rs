@@ -46,7 +46,7 @@ struct Param {
 #[actix_web::get("/test")]
 pub(crate) async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpResponse {
 	log::debug!("param = {}", data.data);
-	let state = crate::app_state::get_state().await;
+	let state = crate::get_state().await;
 	log::debug!("state = {:#?}", state.appid);
 	return actix_web::HttpResponse::Ok().json(json!({
 		"data": 100,
@@ -91,11 +91,11 @@ pub(crate) async fn test_post2(data: actix_web::web::Json<Data>) -> actix_web::H
 // pub(crate) async fn db(
 // 	_req: actix_web::HttpRequest,
 // 	query: actix_web::web::Query<Query>,
-// 	state: actix_web::web::Data<std::sync::Arc<crate::app_state::AppState>>,
 // ) -> String {
 // 	log::debug!("param = {:#?}", query);
 // 	log::debug!("data = {}", query.data);
 // 	log::debug!("msg = {}", query.msg);
+// 	let state = crate::app_state::get_state().await;
 // 	let client = state.mssql.as_ref();
 // 	let rows = crate::db::mssql::sys_user::SysUser::all()
 // 		.limit(3)

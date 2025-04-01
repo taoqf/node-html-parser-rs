@@ -2,9 +2,9 @@
 pub(crate) struct AppState {
 	pub(crate) appid: String,
 	pub(crate) appsecret: String,
-	// pub(crate) weixinwork: super::atoms::weixin::work::index::WeixinWork,
-	// pub(crate) weixin: super::atoms::weixin::weixin::index::Weixin,
-	// pub(crate) pg: Box<dyn welds::Client>,
+	pub(crate) weixinwork: super::atoms::weixin::work::index::WeixinWork,
+	pub(crate) weixin: super::atoms::weixin::weixin::index::Weixin,
+	pub(crate) pg: Box<dyn welds::Client>,
 	pub(crate) file_msg_encode_enable: bool,
 	pub(crate) file_server: String,
 	pub(crate) file_msg_encode_appid: String,
@@ -22,12 +22,11 @@ pub(crate) async fn get_state() -> &'static AppState {
 
 impl AppState {
 	async fn new() -> Self {
-		let appid = std::env::var("WX_APPID").unwrap();
+		let appid = std::env::var("APP_ID").unwrap();
 		log::debug!("appid={}", appid);
-		let appsecret = std::env::var("WX_APPSECRET").unwrap();
+		let appsecret = std::env::var("APP_SECRET").unwrap();
 		log::debug!("appsecret={}", appsecret);
-
-		// let pg = crate::atoms::db::get_db("DB_PG").await;
+		let pg = crate::atoms::db::get_db("DB_PG").await;
 		let file_msg_encode_enable = std::env::var("FILE_MSG_ENCODE_ENABLE")
 			.unwrap()
 			.parse::<i32>()
@@ -40,15 +39,15 @@ impl AppState {
 		let file_msg_encode_safe_key = std::env::var("FILE_MSG_ENCODE_SAFE_KEY").unwrap();
 		log::debug!("file_msg_encode_safe_key={}", file_msg_encode_safe_key);
 
-		// let weixinwork = crate::atoms::weixin::work::index::WeixinWork::new().await;
-		// let weixin = crate::atoms::weixin::weixin::index::Weixin::new().await;
+		let weixinwork = crate::atoms::weixin::work::index::WeixinWork::new().await;
+		let weixin = crate::atoms::weixin::weixin::index::Weixin::new().await;
 
 		return Self {
 			appid,
 			appsecret,
-			// weixin,
-			// weixinwork,
-			// pg,
+			weixin,
+			weixinwork,
+			pg,
 			file_msg_encode_enable: file_msg_encode_enable == 1,
 			file_server,
 			file_msg_encode_appid,
