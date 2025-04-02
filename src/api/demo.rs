@@ -1,5 +1,3 @@
-use serde_json::json;
-
 #[actix_web::get("/")]
 pub(crate) async fn hello() -> &'static str {
 	let url = format!("http://127.0.0.1:3000/api/{}?data=123", "test");
@@ -46,12 +44,9 @@ struct Param {
 #[actix_web::get("/test")]
 pub(crate) async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpResponse {
 	log::debug!("param = {}", data.data);
-	let state = crate::get_state().await;
-	log::debug!("state = {:#?}", state.appid);
-	return actix_web::HttpResponse::Ok().json(json!({
-		"data": 100,
-		"msg": "ok".to_owned(),
-	}));
+	let ctrlr = crate::get_c001().await;
+	let value = ctrlr.getappid().await;
+	return actix_web::HttpResponse::Ok().json(value);
 }
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
