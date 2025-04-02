@@ -2,6 +2,8 @@ services:
   webserver:
     stdin_open: true
     image: 01factory.io/${APP_ID:-01factory}-web:dev
+    environment:
+      - APP_ID=${APP_ID:-01factory}
     volumes:
       - ~/data:/data
       - ~/.ssh:/root/.ssh
