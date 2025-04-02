@@ -4,7 +4,7 @@ pub(crate) struct AppState {
 	pub(crate) appsecret: String,
 	pub(crate) weixinwork: super::atoms::weixin::work::index::WeixinWork,
 	pub(crate) weixin: super::atoms::weixin::weixin::index::Weixin,
-	pub(crate) pg: Box<dyn welds::Client>,
+	pub(crate) pg: welds_connections::any::AnyClient,
 	pub(crate) file_msg_encode_enable: bool,
 	pub(crate) file_server: String,
 	pub(crate) file_msg_encode_appid: String,

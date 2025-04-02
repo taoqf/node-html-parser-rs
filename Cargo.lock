@@ -3776,9 +3776,9 @@ dependencies = [
 
 [[package]]
 name = "welds"
-version = "0.4.11"
+version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5030adf320dcfc554fbed05c04a0d0c08ec02e791481d23a6f958e24046ad9b"
+checksum = "f6e70ca4f7ade604fec5cd610424de3010a7b7d1810f33581f6c0890a9579db9"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3790,9 +3790,9 @@ dependencies = [
 
 [[package]]
 name = "welds-connections"
-version = "0.4.11"
+version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f9b3d9b84785877e494bb34a2f3db7133bdb5e43579a5a998cbb5c47c778821"
+checksum = "eeb7b89c85a9ec073174e73b3f1bc596e553b86b7c41fbd9ec696560756dc46c"
 dependencies = [
  "async-trait",
  "log",
@@ -3802,9 +3802,9 @@ dependencies = [
 
 [[package]]
 name = "welds-macros"
-version = "0.4.11"
+version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa8f7af61092e11cd4d2cdc438835bc20701d9f080a9e9ca76194376198e00a0"
+checksum = "9ac2c72d23ff6ee4d00e758908803b4a89faa1cc9df1030b3614c9d4ae554a61"
 dependencies = [
  "log",
  "proc-macro2",

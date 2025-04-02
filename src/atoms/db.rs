@@ -6,7 +6,7 @@ pub(crate) async fn get_mssql_effected_rows(client: &dyn welds::Client) -> u32 {
 }
 
 #[allow(dead_code)]
-pub(crate) async fn get_db(env_key: &str) -> Box<dyn welds::Client> {
+pub(crate) async fn get_db(env_key: &str) -> welds_connections::any::AnyClient {
 	let url_db = std::env::var(env_key).unwrap();
 	log::debug!("DB_URL={}", url_db);
 	let client = welds::connections::connect(url_db.as_str()).await.unwrap();
