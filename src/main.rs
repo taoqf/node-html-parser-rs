@@ -5,10 +5,6 @@ pub(crate) mod controllers;
 pub(crate) mod db;
 
 pub(crate) use app_state::get_state;
-#[allow(unused_imports)]
-pub(crate) use controllers::c001::get_c001;
-#[allow(unused_imports)]
-pub(crate) use controllers::c002::get_c002;
 
 #[actix_web::main]
 async fn main() {

@@ -44,7 +44,7 @@ struct Param {
 #[actix_web::get("/test")]
 pub(crate) async fn test_post(data: actix_web::web::Query<Param>) -> actix_web::HttpResponse {
 	log::debug!("param = {}", data.data);
-	let ctrlr = crate::get_c001().await;
+	let ctrlr = crate::controllers::get_c001().await;
 	let value = ctrlr.getappid().await;
 	return actix_web::HttpResponse::Ok().json(value);
 }

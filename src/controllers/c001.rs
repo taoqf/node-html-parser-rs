@@ -10,7 +10,7 @@ lazy_static::lazy_static! {
 }
 
 #[allow(dead_code)]
-pub(crate) async fn get_c001() -> &'static Controller {
+pub(crate) async fn get_ctrl() -> &'static Controller {
 	CONTROLLER
 		.get_or_init(|| async { Controller::new().await })
 		.await

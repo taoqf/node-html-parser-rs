@@ -1,3 +1,4 @@
+pub(super) mod common;
 pub(crate) mod db;
 pub(crate) mod doccode;
 pub(crate) mod dt;
@@ -7,3 +8,6 @@ pub(crate) mod num;
 pub(crate) mod str;
 pub(crate) mod uuid;
 pub(crate) mod weixin;
+
+#[allow(unused_imports)]
+pub(crate) use common::*;

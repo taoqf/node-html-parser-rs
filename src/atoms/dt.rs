@@ -130,3 +130,25 @@ fn test_remove_time_zone() {
 	let dt_str = dt2str(&Some(dt), DtType::DATETIME);
 	assert_eq!(dt_str, "2025-02-12 00:00:00");
 }
+
+/**
+ * 时间戳转换为时间
+ */
+#[allow(dead_code)]
+pub(crate) fn stamp2dt(dtstamp: u64) -> chrono::NaiveDateTime {
+	let dt = chrono::DateTime::from_timestamp_millis(dtstamp as i64);
+	let dt = dt.unwrap();
+	return dt.naive_local();
+}
+
+/**
+ * 时间戳转换为时间
+ */
+#[allow(dead_code)]
+pub(crate) fn stamp2str(dtstamp: u64, dt_type: DtType) -> String {
+	let dt = chrono::DateTime::from_timestamp_millis(dtstamp as i64);
+	let dt = dt.unwrap();
+	let dt = dt.naive_local();
+	let dt = dt2str(&Some(dt), dt_type);
+	return dt;
+}
