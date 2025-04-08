@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+
 use super::smartsheet::Field;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) enum CellTextValue {
 	/// 内容为文本(值为text)、内容为链接(值为url)
 	Text(String),
@@ -24,7 +26,7 @@ pub(crate) struct CellImageValue {
 	pub(crate) height: i32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum CellAttachmentFileType {
 	/// 文件夹
 	Folder,
@@ -46,7 +48,7 @@ pub(crate) enum CellAttachmentFileType {
 	SmartSheet,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum CellAttachmentDocType {
 	/// 1
 	Folder,
@@ -54,7 +56,7 @@ pub(crate) enum CellAttachmentDocType {
 	File,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct CellAttachmentValue {
 	/// 文件名
 	pub(crate) name: String,
@@ -89,7 +91,7 @@ pub(crate) struct CellUrlValue {
 	pub(crate) link: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum OptionStyle {
 	/// 1	浅红1
 	浅红1 = 1,
@@ -147,7 +149,7 @@ pub(crate) enum OptionStyle {
 	粉红,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) struct OptionValue {
 	/// 选项ID
 	pub(crate) id: String,
@@ -157,14 +159,14 @@ pub(crate) struct OptionValue {
 	pub(crate) text: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) enum CellLocationSourceType {
 	/// 1	腾讯地图
 	Tencent,
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct CellLocationValue {
 	/// uint32	填1，表示来源为腾讯地图。目前只支持腾讯地图来源
 	pub(crate) source_type: CellLocationSourceType,
@@ -179,7 +181,7 @@ pub(crate) struct CellLocationValue {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub(crate) struct CellTwoWayLinkRecordsValue {
 	pub(crate) format: serde_json::Value, // todo 没有值
 	pub(crate) text: String,
@@ -187,7 +189,7 @@ pub(crate) struct CellTwoWayLinkRecordsValue {
 	pub(crate) text_type: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct CellAutoNumberValue {
 	/// 序号
 	pub(crate) seq: String,
@@ -195,7 +197,7 @@ pub(crate) struct CellAutoNumberValue {
 	pub(crate) text: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) enum CellValue {
 	FieldTypeUnknown,
 	/// 文本(FIELD_TYPE_TEXT)	Object[](CellTextValue)
@@ -234,6 +236,23 @@ pub(crate) enum CellValue {
 	FieldTypeCurrency(f64),
 	/// 自动编号(FIELD_TYPE_AUTONUMBER)	Object[](CellAutoNumberValue)
 	FieldTypeAutonumber(CellAutoNumberValue),
+	/// 扩展字段 创建人
+	FieldTypeExtCreateName(String),
+	/// 扩展字段 创建时间
+	FieldTypeExtCreateTime(u64),
+	/// 扩展字段 最后编辑人
+	FieldTypeExtUpdateName(String),
+	/// 扩展字段 最后编辑时间
+	FieldTypeExtUpdateTime(u64),
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
+pub(crate) struct ExtFields {
+	pub(crate) creator_name: String,
+	pub(crate) updater_name: String,
+	pub(crate) tm_create: u64,
+	pub(crate) tm_update: u64,
 }
 
 #[allow(dead_code)]
@@ -243,29 +262,17 @@ impl super::super::index::WeixinWork {
 		&self,
 		values: &serde_json::Value,
 		fields: &HashMap<String, Field>,
+		ext_fields: &ExtFields,
 	) -> HashMap<String, CellValue> {
 		let values = values.as_object().unwrap();
-		let values = values
-			.iter()
-			.map(|(key, val)| {
-				match fields.get(key) {
-					None => {
-						log::debug!(
-							"111111111111111111111111111{}:{:#?}=={:#?}",
-							key,
-							val,
-							fields
-						);
-						(key.to_owned(), CellValue::FieldTypeUnknown)
-					}
-					Some(field) => {
-						log::debug!(
-							"00000000000000000000000000000{}:{:#?}=={:#?}",
-							key,
-							val,
-							field
-						);
-						let value = match field.field_type.as_str() {
+		let values = fields
+			.par_iter()
+			.map(|(key, field)| {
+				let v = values.get(key);
+				match v {
+					Some(val) => {
+						let field_type = field.field_type.as_str();
+						let value = match field_type {
 							// 文本
 							"FIELD_TYPE_TEXT" => {
 								let val = match val.as_array() {
@@ -452,13 +459,21 @@ impl super::super::index::WeixinWork {
 								CellValue::FieldTypeSelect(vals)
 							}
 							// 创建人
-							// "FIELD_TYPE_CREATED_USER" => {}
+							"FIELD_TYPE_CREATED_USER" => {
+								CellValue::FieldTypeExtCreateName(ext_fields.creator_name.clone())
+							}
 							// 最后编辑人
-							// "FIELD_TYPE_MODIFIED_USER" => {}
+							"FIELD_TYPE_MODIFIED_USER" => {
+								CellValue::FieldTypeExtUpdateName(ext_fields.updater_name.clone())
+							}
 							// 创建时间
-							// "FIELD_TYPE_CREATED_TIME" => {}
+							"FIELD_TYPE_CREATED_TIME" => {
+								CellValue::FieldTypeExtCreateTime(ext_fields.tm_create)
+							}
 							// 最后编辑时间
-							// "FIELD_TYPE_MODIFIED_TIME" => {}
+							"FIELD_TYPE_MODIFIED_TIME" => {
+								CellValue::FieldTypeExtUpdateTime(ext_fields.tm_update)
+							}
 							// 进度
 							"FIELD_TYPE_PROGRESS" => {
 								let val = val2f64(val);
@@ -536,7 +551,10 @@ impl super::super::index::WeixinWork {
 								CellValue::FieldTypeLocation(val)
 							}
 							// 公式
-							// "FIELD_TYPE_FORMULA" => {}
+							"FIELD_TYPE_FORMULA" => {
+								// !!! 公式类型实际上不能获得值 公式表达式目前是不支持获取内容的，可以调用get_fields获取表达式，再根据表达式获得 @see https://developer.work.weixin.qq.com/community/question/detail?content_id=16633672476770750488 实际上，公式连字段描述获取的全都是空
+								CellValue::FieldTypeText(CellTextValue::Text("".to_string()))
+							}
 							// 货币
 							"FIELD_TYPE_CURRENCY" => {
 								let val = val2f64(val);
@@ -561,9 +579,33 @@ impl super::super::index::WeixinWork {
 						};
 						(key.to_owned(), value)
 					}
+					None => {
+						let field_type = field.field_type.as_str();
+						let value = match field_type {
+							// 创建人
+							"FIELD_TYPE_CREATED_USER" => {
+								CellValue::FieldTypeExtCreateName(ext_fields.creator_name.clone())
+							}
+							// 最后编辑人
+							"FIELD_TYPE_MODIFIED_USER" => {
+								CellValue::FieldTypeExtUpdateName(ext_fields.updater_name.clone())
+							}
+							// 创建时间
+							"FIELD_TYPE_CREATED_TIME" => {
+								CellValue::FieldTypeExtCreateTime(ext_fields.tm_create)
+							}
+							// 最后编辑时间
+							"FIELD_TYPE_MODIFIED_TIME" => {
+								CellValue::FieldTypeExtUpdateTime(ext_fields.tm_update)
+							}
+							#[allow(unreachable_patterns)]
+							_ => CellValue::FieldTypeUnknown,
+						};
+						(key.to_owned(), value)
+					}
 				}
 			})
-			.collect::<HashMap<_, _>>();
+			.collect::<std::collections::HashMap<_, _>>();
 		return values;
 	}
 }
@@ -1036,22 +1078,12 @@ impl super::super::index::WeixinWork {
 							}
 							// 单选
 							"FIELD_TYPE_SINGLE_SELECT" => {
-								let val = match val {
-									CellValue::FieldTypeSingleSelect(val) => match val {
-										Some(val) => {
-											let style = get_text_style_num(&val.style);
-											vec![serde_json::json!({
-												// "id": val.id,
-												"text": val.text,
-												"style": style,
-											})]
-										}
-										None => {
-											vec![]
-										}
-									},
-									_ => vec![],
-								};
+								let val = self.record_val2str(val);
+								let val = vec![serde_json::json!({
+									// "id": val.id,
+									"text": val,
+									"style": 1,
+								})];
 								serde_json::json!(val)
 							}
 							// 关联1--文档
@@ -1212,9 +1244,17 @@ impl super::super::index::WeixinWork {
 				}
 			}
 			// 创建人
+			CellValue::FieldTypeExtCreateName(val) => val.clone(),
 			// 最后编辑人
+			CellValue::FieldTypeExtUpdateName(val) => val.clone(),
 			// 创建时间
+			CellValue::FieldTypeExtCreateTime(dt) => {
+				crate::atoms::dt::stamp2str(*dt, crate::atoms::dt::DtType::DATETIME)
+			}
 			// 最后编辑时间
+			CellValue::FieldTypeExtUpdateTime(dt) => {
+				crate::atoms::dt::stamp2str(*dt, crate::atoms::dt::DtType::DATETIME)
+			}
 			// 进度
 			CellValue::FieldTypeProgress(val) => val.to_string(),
 			// 电话
@@ -1294,9 +1334,14 @@ impl super::super::index::WeixinWork {
 			// 多选
 			CellValue::FieldTypeSelect(_vals) => 0.0,
 			// 创建人
+			CellValue::FieldTypeExtCreateName(val) => val.parse().unwrap_or_default(),
 			// 最后编辑人
+			CellValue::FieldTypeExtUpdateName(val) => val.parse().unwrap_or_default(),
 			// 创建时间
+			CellValue::FieldTypeExtCreateTime(dt) => *dt as f64,
 			// 最后编辑时间
+			CellValue::FieldTypeExtUpdateTime(dt) => *dt as f64,
+
 			// 进度
 			CellValue::FieldTypeProgress(val) => *val,
 			// 电话
@@ -1370,9 +1415,23 @@ impl super::super::index::WeixinWork {
 			// 多选
 			CellValue::FieldTypeSelect(_vals) => vec![],
 			// 创建人
+			CellValue::FieldTypeExtCreateName(val) => vec![val.clone()],
 			// 最后编辑人
+			CellValue::FieldTypeExtUpdateName(val) => vec![val.clone()],
 			// 创建时间
+			CellValue::FieldTypeExtCreateTime(dt) => {
+				vec![crate::atoms::dt::stamp2str(
+					*dt,
+					crate::atoms::dt::DtType::DATETIME,
+				)]
+			}
 			// 最后编辑时间
+			CellValue::FieldTypeExtUpdateTime(dt) => {
+				vec![crate::atoms::dt::stamp2str(
+					*dt,
+					crate::atoms::dt::DtType::DATETIME,
+				)]
+			}
 			// 进度
 			CellValue::FieldTypeProgress(val) => vec![val.to_string()],
 			// 电话
@@ -1433,9 +1492,14 @@ impl super::super::index::WeixinWork {
 			// 多选
 			CellValue::FieldTypeSelect(vals) => vals.is_empty(),
 			// 创建人
+			CellValue::FieldTypeExtCreateName(val) => val.is_empty(),
 			// 最后编辑人
+			CellValue::FieldTypeExtUpdateName(val) => val.is_empty(),
 			// 创建时间
+			CellValue::FieldTypeExtCreateTime(_dt) => true,
 			// 最后编辑时间
+			CellValue::FieldTypeExtUpdateTime(_dt) => true,
+
 			// 进度
 			CellValue::FieldTypeProgress(val) => *val == 0.0,
 			// 电话
@@ -1481,7 +1545,7 @@ impl super::super::index::WeixinWork {
 		}
 		let op = match op {
 			"eq" | "EQ" | "=" | "==" | "===" => CompareType::Eq,
-			"neq" | "NEQ" | "!=" | "!==" => CompareType::Neq,
+			"neq" | "NEQ" | "!=" | "!==" | "<>" => CompareType::Neq,
 			"gt" | ">" => CompareType::Gt,
 			"gte" | ">=" => CompareType::Gte,
 			"lt" | "<" => CompareType::Lt,
@@ -1660,10 +1724,34 @@ impl super::super::index::WeixinWork {
 					CompareType::In => val_compares.contains(&val),
 				}
 			}
-			// 创建人
-			// 最后编辑人
-			// 创建时间
-			// 最后编辑时间
+			// 创建人 最后编辑人
+			CellValue::FieldTypeExtCreateName(val) | CellValue::FieldTypeExtUpdateName(val) => {
+				let val = val.clone();
+				let val_compare = val2str(compared_value);
+				match op {
+					CompareType::Eq => val == val_compare,
+					CompareType::Neq => val != val_compare,
+					CompareType::Gt => val > val_compare,
+					CompareType::Gte => val >= val_compare,
+					CompareType::Lt => val < val_compare,
+					CompareType::Lte => val <= val_compare,
+					CompareType::In => val_compare.contains(&val),
+				}
+			}
+			// 创建时间 最后编辑时间
+			CellValue::FieldTypeExtCreateTime(dt) | CellValue::FieldTypeExtUpdateTime(dt) => {
+				let val = *dt;
+				let val_compare = val2i64(compared_value) as u64;
+				match op {
+					CompareType::Eq => val == val_compare,
+					CompareType::Neq => val != val_compare,
+					CompareType::Gt => val > val_compare,
+					CompareType::Gte => val >= val_compare,
+					CompareType::Lt => val < val_compare,
+					CompareType::Lte | CompareType::In => val <= val_compare,
+				}
+			}
+
 			// 进度 货币
 			CellValue::FieldTypeProgress(val) | CellValue::FieldTypeCurrency(val) => {
 				let val = *val;
@@ -1818,27 +1906,30 @@ impl super::super::index::WeixinWork {
 
 #[allow(dead_code)]
 impl super::super::index::WeixinWork {
-	pub(crate) fn record_compare(&self, value1: &CellValue, value2: &CellValue) -> bool {
+	pub(crate) async fn record_compare<T, R>(
+		&self,
+		value1: &CellValue,
+		value2: &CellValue,
+		get_referenced_str: T,
+	) -> bool
+	where
+		T: Fn(String) -> R,
+		R: std::future::Future<Output = String>,
+	{
+		log::debug!("record_compare: {:#?}==={:#?}", value1, value2);
 		let val = match value1 {
 			// 文本
-			CellValue::FieldTypeText(val1) => match value2 {
-				CellValue::FieldTypeText(val2) => match val1 {
-					CellTextValue::Text(text1) => match val2 {
-						CellTextValue::Text(text2) => text1 == text2,
-						CellTextValue::Url((_text, _link)) => false,
-					},
-					CellTextValue::Url((text1, link1)) => match val2 {
-						CellTextValue::Text(_text2) => false,
-						CellTextValue::Url((text2, link2)) => text1 == text2 && link1 == link2,
-					},
-				},
-				_ => false,
-			},
+			CellValue::FieldTypeText(_val1) => {
+				let v1 = self.record_val2str(value1);
+				let v2 = self.record_val2str(value2);
+				v1 == v2
+			}
 			// 数字
-			CellValue::FieldTypeNumber(val1) => match value2 {
-				CellValue::FieldTypeNumber(val2) => val1 == val2,
-				_ => false,
-			},
+			CellValue::FieldTypeNumber(_val1) => {
+				let v1 = self.record_val2f64(value1);
+				let v2 = self.record_val2f64(value2);
+				v1 == v2
+			}
 			// 复选框
 			CellValue::FieldTypeCheckbox(val1) => match value2 {
 				CellValue::FieldTypeCheckbox(val2) => val1 == val2,
@@ -1929,9 +2020,29 @@ impl super::super::index::WeixinWork {
 				_ => false,
 			},
 			// 创建人
+			CellValue::FieldTypeExtCreateName(val1) => {
+				let v1 = val1.to_owned();
+				let v2 = self.record_val2str(value2);
+				v1 == v2
+			}
 			// 最后编辑人
+			CellValue::FieldTypeExtUpdateName(val1) => {
+				let v1 = val1.to_owned();
+				let v2 = self.record_val2str(value2);
+				v1 == v2
+			}
 			// 创建时间
+			CellValue::FieldTypeExtCreateTime(val1) => {
+				let v1 = *val1 as f64;
+				let v2 = self.record_val2f64(value2);
+				v1 == v2
+			}
 			// 最后编辑时间
+			CellValue::FieldTypeExtUpdateTime(val1) => {
+				let v1 = *val1 as f64;
+				let v2 = self.record_val2f64(value2);
+				v1 == v2
+			}
 			// 进度
 			CellValue::FieldTypeProgress(val1) => match value2 {
 				CellValue::FieldTypeProgress(val2) => val1 == val2,
@@ -1958,19 +2069,17 @@ impl super::super::index::WeixinWork {
 				_ => false,
 			},
 			// 关联
-			CellValue::FieldTypeReference(val1) => match value2 {
-				CellValue::FieldTypeReference(val2) => {
-					if val1.len() == val2.len() {
-						val1.iter().enumerate().all(|(i, v1)| {
-							let v2 = &val2[i];
-							v1.eq(v2)
-						})
-					} else {
-						false
-					}
-				}
-				_ => false,
-			},
+			CellValue::FieldTypeReference(val1) => {
+				let v1 = match val1.first() {
+					Some(v) => v,
+					None => "",
+				};
+				// v1为recordid,根据行号获取记录数据
+				let v1 = get_referenced_str(v1.to_owned()).await;
+				let v2 = self.record_val2str(value2);
+				// 因为不知道具体引用的是哪一个字段，这里只能比较字符串
+				v1.contains(&v2)
+			}
 			// 双向关联
 			CellValue::FieldTypeTwoWayLinkRecords(val1) => match value2 {
 				CellValue::FieldTypeTwoWayLinkRecords(val2) => {
