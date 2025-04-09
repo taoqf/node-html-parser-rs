@@ -1,5 +1,3 @@
-use crypto::digest::Digest;
-
 #[allow(dead_code)]
 pub(crate) fn is_none_or_empty(s: Option<&str>) -> bool {
 	match s {
@@ -39,6 +37,7 @@ pub(crate) fn sha1(val: &str) -> String {
 
 #[allow(dead_code)]
 pub(crate) fn md5(input: &str) -> String {
+	use crypto::digest::Digest;
 	let mut hasher = crypto::md5::Md5::new();
 	hasher.input_str(input);
 	let hex = hasher.result_str();
