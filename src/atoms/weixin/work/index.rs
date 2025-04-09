@@ -24,6 +24,26 @@ impl WeixinWork {
 	}
 }
 
+// #[allow(dead_code)]
+// impl WeixinWork {
+// 	pub(crate) async fn get_contact_access_token(&self) -> String {
+// 		let state = crate::get_state().await;
+// 		let appsecret = std::env::var("QYWX_CONTACTS_SECRET").unwrap();
+// 		log::debug!("appsecret={}", appsecret);
+// 		let token_key = format!("qywxcontacttoken{}", self.agent);
+// 		let token = super::super::token::get_access_token(
+// 			self.appid.as_str(),
+// 			appsecret.as_str(),
+// 			self.get_token_url.as_str(),
+// 			token_key.as_str(),
+// 			state.pg.as_ref(),
+// 		)
+// 		.await;
+// 		log::debug!("token={:#?}", token);
+// 		return token.token;
+// 	}
+// }
+
 #[allow(dead_code)]
 impl WeixinWork {
 	pub(crate) async fn new() -> Self {

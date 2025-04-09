@@ -198,6 +198,14 @@ pub(crate) struct CellAutoNumberValue {
 }
 
 #[derive(Debug, Clone)]
+pub(crate) struct CellExtUser {
+	/// 用户编号
+	pub(crate) userid: String,
+	/// 用户名称
+	pub(crate) username: String,
+}
+
+#[derive(Debug, Clone)]
 pub(crate) enum CellValue {
 	FieldTypeUnknown,
 	/// 文本(FIELD_TYPE_TEXT)	Object[](CellTextValue)
@@ -237,11 +245,11 @@ pub(crate) enum CellValue {
 	/// 自动编号(FIELD_TYPE_AUTONUMBER)	Object[](CellAutoNumberValue)
 	FieldTypeAutonumber(CellAutoNumberValue),
 	/// 扩展字段 创建人
-	FieldTypeExtCreateName(String),
+	FieldTypeExtCreator(CellExtUser),
 	/// 扩展字段 创建时间
 	FieldTypeExtCreateTime(u64),
 	/// 扩展字段 最后编辑人
-	FieldTypeExtUpdateName(String),
+	FieldTypeExtUpdater(CellExtUser),
 	/// 扩展字段 最后编辑时间
 	FieldTypeExtUpdateTime(u64),
 }
@@ -250,7 +258,9 @@ pub(crate) enum CellValue {
 #[derive(Debug, Clone, serde::Serialize, serde:: Deserialize)]
 pub(crate) struct ExtFields {
 	pub(crate) creator_name: String,
+	pub(crate) creator_userid: String,
 	pub(crate) updater_name: String,
+	pub(crate) updater_userid: String,
 	pub(crate) tm_create: u64,
 	pub(crate) tm_update: u64,
 }
@@ -460,11 +470,17 @@ impl super::super::index::WeixinWork {
 							}
 							// 创建人
 							"FIELD_TYPE_CREATED_USER" => {
-								CellValue::FieldTypeExtCreateName(ext_fields.creator_name.clone())
+								CellValue::FieldTypeExtCreator(CellExtUser {
+									userid: ext_fields.creator_userid.clone(),
+									username: ext_fields.creator_name.clone(),
+								})
 							}
 							// 最后编辑人
 							"FIELD_TYPE_MODIFIED_USER" => {
-								CellValue::FieldTypeExtUpdateName(ext_fields.updater_name.clone())
+								CellValue::FieldTypeExtUpdater(CellExtUser {
+									userid: ext_fields.updater_userid.clone(),
+									username: ext_fields.updater_name.clone(),
+								})
 							}
 							// 创建时间
 							"FIELD_TYPE_CREATED_TIME" => {
@@ -584,11 +600,17 @@ impl super::super::index::WeixinWork {
 						let value = match field_type {
 							// 创建人
 							"FIELD_TYPE_CREATED_USER" => {
-								CellValue::FieldTypeExtCreateName(ext_fields.creator_name.clone())
+								CellValue::FieldTypeExtCreator(CellExtUser {
+									userid: ext_fields.creator_userid.clone(),
+									username: ext_fields.creator_name.clone(),
+								})
 							}
 							// 最后编辑人
 							"FIELD_TYPE_MODIFIED_USER" => {
-								CellValue::FieldTypeExtUpdateName(ext_fields.updater_name.clone())
+								CellValue::FieldTypeExtUpdater(CellExtUser {
+									userid: ext_fields.updater_userid.clone(),
+									username: ext_fields.updater_name.clone(),
+								})
 							}
 							// 创建时间
 							"FIELD_TYPE_CREATED_TIME" => {
@@ -995,6 +1017,7 @@ impl super::super::index::WeixinWork {
 							}
 							// 成员
 							"FIELD_TYPE_USER" => {
+								log::debug!("11111111111111111111111111{:#?}", val);
 								let val = match val {
 									CellValue::FieldTypeUser(vals) => vals
 										.iter()
@@ -1005,6 +1028,13 @@ impl super::super::index::WeixinWork {
 											})
 										})
 										.collect::<Vec<_>>(),
+									CellValue::FieldTypeExtCreator(val) => {
+										let userid = val.userid.clone();
+										vec![serde_json::json!({
+											"user_id": userid.clone(),
+											"tmp_external_userid": userid,
+										})]
+									}
 									_ => vec![],
 								};
 								serde_json::json!(val)
@@ -1244,9 +1274,9 @@ impl super::super::index::WeixinWork {
 				}
 			}
 			// 创建人
-			CellValue::FieldTypeExtCreateName(val) => val.clone(),
+			CellValue::FieldTypeExtCreator(val) => val.username.clone(),
 			// 最后编辑人
-			CellValue::FieldTypeExtUpdateName(val) => val.clone(),
+			CellValue::FieldTypeExtUpdater(val) => val.username.clone(),
 			// 创建时间
 			CellValue::FieldTypeExtCreateTime(dt) => {
 				crate::atoms::dt::stamp2str(*dt, crate::atoms::dt::DtType::DATETIME)
@@ -1334,9 +1364,9 @@ impl super::super::index::WeixinWork {
 			// 多选
 			CellValue::FieldTypeSelect(_vals) => 0.0,
 			// 创建人
-			CellValue::FieldTypeExtCreateName(val) => val.parse().unwrap_or_default(),
+			CellValue::FieldTypeExtCreator(_val) => 0.0,
 			// 最后编辑人
-			CellValue::FieldTypeExtUpdateName(val) => val.parse().unwrap_or_default(),
+			CellValue::FieldTypeExtUpdater(_val) => 0.0,
 			// 创建时间
 			CellValue::FieldTypeExtCreateTime(dt) => *dt as f64,
 			// 最后编辑时间
@@ -1415,9 +1445,9 @@ impl super::super::index::WeixinWork {
 			// 多选
 			CellValue::FieldTypeSelect(_vals) => vec![],
 			// 创建人
-			CellValue::FieldTypeExtCreateName(val) => vec![val.clone()],
+			CellValue::FieldTypeExtCreator(val) => vec![val.username.clone()],
 			// 最后编辑人
-			CellValue::FieldTypeExtUpdateName(val) => vec![val.clone()],
+			CellValue::FieldTypeExtUpdater(val) => vec![val.username.clone()],
 			// 创建时间
 			CellValue::FieldTypeExtCreateTime(dt) => {
 				vec![crate::atoms::dt::stamp2str(
@@ -1492,9 +1522,9 @@ impl super::super::index::WeixinWork {
 			// 多选
 			CellValue::FieldTypeSelect(vals) => vals.is_empty(),
 			// 创建人
-			CellValue::FieldTypeExtCreateName(val) => val.is_empty(),
+			CellValue::FieldTypeExtCreator(val) => val.username.is_empty(),
 			// 最后编辑人
-			CellValue::FieldTypeExtUpdateName(val) => val.is_empty(),
+			CellValue::FieldTypeExtUpdater(val) => val.username.is_empty(),
 			// 创建时间
 			CellValue::FieldTypeExtCreateTime(_dt) => true,
 			// 最后编辑时间
@@ -1725,8 +1755,8 @@ impl super::super::index::WeixinWork {
 				}
 			}
 			// 创建人 最后编辑人
-			CellValue::FieldTypeExtCreateName(val) | CellValue::FieldTypeExtUpdateName(val) => {
-				let val = val.clone();
+			CellValue::FieldTypeExtCreator(val) | CellValue::FieldTypeExtUpdater(val) => {
+				let val = val.username.clone();
 				let val_compare = val2str(compared_value);
 				match op {
 					CompareType::Eq => val == val_compare,
@@ -2020,14 +2050,14 @@ impl super::super::index::WeixinWork {
 				_ => false,
 			},
 			// 创建人
-			CellValue::FieldTypeExtCreateName(val1) => {
-				let v1 = val1.to_owned();
+			CellValue::FieldTypeExtCreator(val1) => {
+				let v1 = val1.username.to_owned();
 				let v2 = self.record_val2str(value2);
 				v1 == v2
 			}
 			// 最后编辑人
-			CellValue::FieldTypeExtUpdateName(val1) => {
-				let v1 = val1.to_owned();
+			CellValue::FieldTypeExtUpdater(val1) => {
+				let v1 = val1.username.to_owned();
 				let v2 = self.record_val2str(value2);
 				v1 == v2
 			}
