@@ -152,3 +152,37 @@ pub(crate) fn stamp2str(dtstamp: u64, dt_type: DtType) -> String {
 	let dt = dt2str(&Some(dt), dt_type);
 	return dt;
 }
+
+/**
+ * 时间转时间戳
+ */
+#[allow(dead_code)]
+pub(crate) fn dt2stamp(dt: &chrono::NaiveDateTime) -> u64 {
+	return dt.and_utc().timestamp_millis() as u64;
+}
+
+/**
+ * 时间字符串转时间戳
+ */
+#[allow(dead_code)]
+pub(crate) fn str2stamp(dt_str: &str) -> u64 {
+	// 尝试解析 ISO 8601 格式
+	if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(dt_str) {
+		return dt.timestamp_millis() as u64;
+	}
+
+	// 尝试解析其他常见格式
+	let common_formats = [
+		"%Y-%m-%d %H:%M:%S",
+		"%Y/%m/%d %H:%M:%S",
+		"%Y-%m-%dT%H:%M:%S",
+		"%Y-%m-%d",
+	];
+
+	for format in &common_formats {
+		if let Ok(dt) = chrono::NaiveDateTime::parse_from_str(dt_str, format) {
+			return dt2stamp(&dt);
+		}
+	}
+	return 0;
+}

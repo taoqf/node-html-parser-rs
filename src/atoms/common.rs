@@ -1,6 +1,8 @@
 #[allow(unused_imports)]
 pub(crate) use super::dt::DtType;
 #[allow(unused_imports)]
+pub(crate) use super::dt::dt2stamp;
+#[allow(unused_imports)]
 pub(crate) use super::dt::dt2str;
 #[allow(unused_imports)]
 pub(crate) use super::dt::now;
@@ -18,6 +20,8 @@ pub(crate) use super::dt::stamp2dt;
 pub(crate) use super::dt::stamp2str;
 #[allow(unused_imports)]
 pub(crate) use super::dt::str2dt;
+#[allow(unused_imports)]
+pub(crate) use super::dt::str2stamp;
 #[allow(unused_imports)]
 pub(crate) use super::str::md5;
 #[allow(unused_imports)]
