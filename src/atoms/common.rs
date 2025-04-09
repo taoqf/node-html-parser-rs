@@ -19,8 +19,10 @@ pub(crate) use super::dt::stamp2str;
 #[allow(unused_imports)]
 pub(crate) use super::dt::str2dt;
 #[allow(unused_imports)]
+pub(crate) use super::str::md5;
+#[allow(unused_imports)]
 pub(crate) use super::str::opt2str;
 #[allow(unused_imports)]
 pub(crate) use super::str::str2opt;
 #[allow(unused_imports)]
-pub(crate) use super::uuid::uuid;
+pub(crate) use super::str::uuid;

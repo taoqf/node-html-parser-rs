@@ -19,9 +19,10 @@ actix-web = "4.10.2"
 regex = "1.11.1"
 futures = "0.3.31"
 bytes = "1.10.1"
-md5 = "0.7.0"
+# md5 = "0.7.0"
 percent-encoding = "2.3.1"
 lazy_static = "1.5.0"
+rust-crypto = "0.2.36"
 # diesel = { version = "2.2.6", features = ["postgres"] }
 
 # [dependencies.deadpool-tiberius]

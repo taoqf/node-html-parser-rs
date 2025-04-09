@@ -6,7 +6,6 @@ pub(crate) mod file;
 pub(crate) mod md5;
 pub(crate) mod num;
 pub(crate) mod str;
-pub(crate) mod uuid;
 pub(crate) mod weixin;
 
 #[allow(unused_imports)]

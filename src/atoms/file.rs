@@ -1,5 +1,3 @@
-use super::{md5::md5, uuid::uuid};
-
 #[allow(dead_code)]
 #[derive(Debug, serde::Deserialize)]
 pub(crate) struct UploadedFileInfo {
@@ -17,8 +15,8 @@ pub(crate) async fn upload(file_content: bytes::Bytes, file_name: &str) -> Uploa
 	let request = if state.file_msg_encode_enable {
 		let random = super::dt::now_stamp();
 		let safe_code = &state.file_msg_encode_safe_key.clone();
-		let annonce = uuid();
-		let token = md5(format!("{safe_code}{random}{annonce}{random}{safe_code}"));
+		let annonce = crate::atoms::uuid();
+		let token = crate::atoms::md5(&format!("{safe_code}{random}{annonce}{random}{safe_code}"));
 		// let cookie = format!(
 		// 	"x-appid={};x-token={};x-random={};x-annonce={}",
 		// 	&state.appid, token, random, annonce
@@ -99,5 +97,5 @@ fn get_file_name_from_disposition(headers: &reqwest::header::HeaderMap) -> Strin
 			}
 		}
 	}
-	return super::uuid::uuid();
+	return crate::atoms::uuid();
 }
