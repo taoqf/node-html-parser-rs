@@ -3,10 +3,12 @@ pub(crate) mod app_state;
 pub(crate) mod atoms;
 pub(crate) mod controllers;
 pub(crate) mod db;
+pub(crate) mod err;
 
 pub(crate) use app_state::get_state;
 #[allow(unused_imports)]
 pub(crate) use controllers as ctrls;
+pub(crate) use err::AppResponse;
 
 #[actix_web::main]
 async fn main() {
@@ -14,11 +16,12 @@ async fn main() {
 	dotenvy::dotenv().unwrap();
 	let state = crate::get_state().await;
 	actix_web::HttpServer::new(move || {
-		actix_web::App::new().service(
-			actix_web::web::scope(&state.appid)
-				.service(api::demo::hello)
-				.service(api::demo::test_post),
-		)
+		actix_web::App::new()
+			.wrap(actix_web::middleware::Logger::default())
+			.service(
+				actix_web::web::scope(&state.appid)
+					.service(actix_web::web::scope("g000").service(api::g000::s000::a001)),
+			)
 	})
 	// .workers(12)
 	.bind(("0.0.0.0", 3000))

@@ -1,3 +1,4 @@
+pub(crate) mod app_result;
 pub(super) mod common;
 pub(crate) mod db;
 pub(crate) mod doccode;

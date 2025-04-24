@@ -1,3 +1,5 @@
+use anyhow::Ok;
+
 pub(crate) struct Controller;
 
 impl Controller {
@@ -16,10 +18,12 @@ pub(crate) async fn get_ctrl() -> &'static Controller {
 		.await
 }
 
+#[derive(Debug, serde::Deserialize)]
+pub(crate) struct A00Param {}
+
 impl Controller {
-	pub(crate) async fn getappid(&self) -> serde_json::Value {
-		let state = crate::get_state().await;
-		let appid = state.appid.as_str();
-		return serde_json::json!({ "appid": appid });
+	pub(crate) async fn a000(&self, param: A00Param) -> anyhow::Result<serde_json::Value> {
+		log::debug!("c000/param {:#?}", param);
+		return Ok(serde_json::json!({}));
 	}
 }

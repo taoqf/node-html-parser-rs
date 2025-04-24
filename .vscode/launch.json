@@ -7,15 +7,15 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug executable 'dfactory01'",
+			"name": "Debug executable 'mmstudio'",
 			"cargo": {
 				"args": [
 					"build",
-					"--bin=dfactory01",
-					"--package=dfactory01"
+					"--bin=mm",
+					"--package=mm"
 				],
 				"filter": {
-					"name": "dfactory01",
+					"name": "mm",
 					"kind": "bin"
 				}
 			},
@@ -25,16 +25,16 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug unit tests in executable 'dfactory01'",
+			"name": "Debug unit tests in executable 'mm'",
 			"cargo": {
 				"args": [
 					"test",
 					"--no-run",
-					"--bin=dfactory01",
-					"--package=dfactory01"
+					"--bin=mm",
+					"--package=mm"
 				],
 				"filter": {
-					"name": "dfactory01",
+					"name": "mm",
 					"kind": "bin"
 				}
 			},

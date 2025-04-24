@@ -1,5 +1,5 @@
 [package]
-name = "dfactory01"
+name = "mm"
 version = "0.1.0"
 edition = "2024"
 
@@ -23,6 +23,8 @@ bytes = "1.10.1"
 percent-encoding = "2.3.1"
 lazy_static = "1.5.0"
 rust-crypto = "0.2.36"
+anyhow = "1.0.98"
+actix-web-codegen = "4.3.0"
 # diesel = { version = "2.2.6", features = ["postgres"] }
 
 # [dependencies.deadpool-tiberius]
