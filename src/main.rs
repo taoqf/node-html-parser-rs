@@ -18,10 +18,15 @@ async fn main() {
 	actix_web::HttpServer::new(move || {
 		actix_web::App::new()
 			.wrap(actix_web::middleware::Logger::default())
-			.wrap(actix_web::middleware::from_fn(auth_middleware))
 			.service(
 				actix_web::web::scope(&state.appid)
-					.service(actix_web::web::scope("g000").service(api::g000::s000::a001)),
+					.wrap(actix_web::middleware::from_fn(auth_middleware))
+					.service(
+						actix_web::web::scope("g000")
+							.service(api::g000::s000::a000)
+							.service(api::g000::s000::a001)
+							.service(api::g000::s000::a002),
+					),
 			)
 	})
 	// .workers(12)
@@ -44,22 +49,21 @@ async fn auth_middleware(
 		// 模拟异步用户鉴权
 		if auth_header == "valid-token" {
 			// 如果鉴权成功，继续处理请求
-			let res = next.call(req).await;
-			return match res {
-				Ok(res) => {
-					log::debug!("Success calling {}", uri);
-					Ok(res)
-				}
-				Err(err) => {
-					// 调用服务失败
-					log::error!("Runtime Error while calling {}:{}", uri, err);
-					Err(err)
-				}
-			};
+			return next.call(req).await;
+			// let res = next.call(req).await;
+			// return match res {
+			// 	Ok(res) => {
+			// 		log::debug!("Success calling {}", uri);
+			// 		Ok(res)
+			// 	}
+			// 	Err(err) => {
+			// 		// 调用服务失败
+			// 		log::error!("Runtime Error while calling {}:{}", uri, err);
+			// 		Err(err)
+			// 	}
+			// };
 		}
 	}
 
-	return Err(actix_web::Error::from(err::AppError::from(
-		anyhow::Error::msg("Unauthorized"),
-	)));
+	return Err(actix_web::Error::from(err::AppError::msg("Unauthorized")));
 }

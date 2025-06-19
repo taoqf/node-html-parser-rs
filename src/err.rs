@@ -29,3 +29,9 @@ impl From<anyhow::Error> for AppError {
 		return Self(err);
 	}
 }
+
+impl AppError {
+	pub fn msg(err: &str) -> Self {
+		return Self(anyhow::Error::msg(err.to_owned()));
+	}
+}

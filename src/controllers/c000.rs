@@ -1,4 +1,4 @@
-use anyhow::Ok;
+use anyhow::{Context, Ok};
 
 pub(crate) struct Controller;
 
@@ -25,5 +25,21 @@ impl Controller {
 	pub(crate) async fn a000(&self, param: A00Param) -> anyhow::Result<serde_json::Value> {
 		log::debug!("c000/param {:#?}", param);
 		return Ok(serde_json::json!({}));
+	}
+	pub(crate) async fn a001(&self) -> anyhow::Result<serde_json::Value> {
+		log::debug!("c002");
+		let num = "mm".parse::<i32>()?;
+		return Ok(serde_json::json!({
+			"num":num
+		}));
+	}
+	pub(crate) async fn a002(&self) -> anyhow::Result<serde_json::Value> {
+		log::debug!("c002");
+		let num = "mm"
+			.parse::<i32>()
+			.context("Could not convert to interger")?;
+		return Ok(serde_json::json!({
+			"num":num
+		}));
 	}
 }
