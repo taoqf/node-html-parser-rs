@@ -1,9 +1,9 @@
 services:
   webserver:
     stdin_open: true
-    image: 01factory.io/${APP_ID:-01factory}-web:dev
+    image: mm.io/${APP_ID:-mm}-web:dev
     environment:
-      - APP_ID=${APP_ID:-01factory}
+      - APP_ID=${APP_ID:-mm}
     volumes:
       - ~/data:/data
       - ~/.ssh:/root/.ssh
@@ -17,19 +17,19 @@ services:
       dockerfile: .devcontainer/app
 
   db:
-    image: dfactory01-docker.pkg.coding.net/01factory/release/postgres:latest
+    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/postgres:latest
     environment:
-      - POSTGRES_DB=${DB_NAME:-01factory}
-      - POSTGRES_USER=${DB_USER:-01factory}
-      - POSTGRES_PASSWORD=${DB_PSWD:-01factory}
+      - POSTGRES_DB=${DB_NAME:-mm}
+      - POSTGRES_USER=${DB_USER:-mm}
+      - POSTGRES_PASSWORD=${DB_PSWD:-mm}
     volumes:
       - ../init.d/mm.sql:/docker-entrypoint-initdb.d/mm.sql
 
   nginx:
-    image: dfactory01-docker.pkg.coding.net/01factory/release/nginx:latest
+    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/nginx:latest
     environment:
       - NGINX_PORT=${NGINX_PORT:-3456}
-      # - NGINX_BASEPATH=${NGINX_BASEPATH:-01factory}
+      # - NGINX_BASEPATH=${NGINX_BASEPATH:-mm}
       - NGINX_DOMAIN=${NGINX_DOMAIN:-localhost}
       - TZ=Asia/Shanghai
     ports:
@@ -38,24 +38,24 @@ services:
       - ./nginx.conf:/etc/nginx/templates/default.conf.template
 
   doccode:
-    image: dfactory01-docker.pkg.coding.net/01factory/release/doccode:latest
+    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/doccode:latest
     environment:
       - DOCCODE_TB=${DOCCODE_TB:-tb01doccode}
       - DOCCODE_PORT=${DOCCODE_PORT:-8090}
-      - DOCCODE_DBNAME=${DB_NAME:-01factory}
-      - DOCCODE_DBUSR=${DB_USER:-01factory}
-      - DOCCODE_DBPSW=${DB_PSWD:-01factory}
+      - DOCCODE_DBNAME=${DB_NAME:-mm}
+      - DOCCODE_DBUSR=${DB_USER:-mm}
+      - DOCCODE_DBPSW=${DB_PSWD:-mm}
       - DOCCODE_DBHOST=${DOCCODE_DBHOST:-db}
       - DOCCODE_DBPORT=${DOCCODE_DBPORT:-5432}
 
   adminer:
-    image: dfactory01-docker.pkg.coding.net/01factory/release/adminer:latest
+    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/adminer:latest
 
   minio:
-    image: dfactory01-docker.pkg.coding.net/01factory/release/minio:latest
+    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/minio:latest
     environment:
-      - MINIO_ROOT_USER=${MINIO_USER:-01factory}
-      - MINIO_ROOT_PASSWORD=${MINIO_PSWD:-01factory}
+      - MINIO_ROOT_USER=${MINIO_USER:-mmstudio}
+      - MINIO_ROOT_PASSWORD=${MINIO_PSWD:-mmstudio}
 
   fileview:
-    image: dfactory01-docker.pkg.coding.net/01factory/release/fileview:latest
+    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/fileview:latest

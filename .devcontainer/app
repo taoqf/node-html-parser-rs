@@ -1,6 +1,6 @@
-FROM dfactory01-docker.pkg.coding.net/01factory/release/rust:latest
+FROM mmstudio01-docker.pkg.coding.net/mmstudio/mm/rust:latest
 
-WORKDIR /01factory
+WORKDIR /mm
 
 ADD . .
 
