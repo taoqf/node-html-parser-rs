@@ -7,6 +7,7 @@ pub(crate) fn json(
 	})));
 }
 
+#[allow(dead_code)]
 pub(crate) fn text(
 	value: &str,
 ) -> actix_web::Result<actix_web::HttpResponse, crate::err::AppError> {
@@ -16,6 +17,7 @@ pub(crate) fn text(
 	})));
 }
 
+#[allow(dead_code)]
 pub(crate) fn err(value: &str) -> actix_web::Result<actix_web::HttpResponse, crate::err::AppError> {
 	return Ok(actix_web::HttpResponse::Ok().json(serde_json::json!({
 		"ok": false,

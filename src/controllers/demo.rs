@@ -20,6 +20,7 @@ pub(crate) async fn get_ctrl() -> &'static Controller {
 }
 
 impl Controller {
+	#[allow(dead_code)]
 	pub(crate) async fn hello(&self) -> anyhow::Result<&'static str> {
 		let url = format!("http://127.0.0.1:3000/api/{}?data=123", "test");
 		let client = reqwest::Client::new();
@@ -51,6 +52,7 @@ pub(crate) struct TestPostParam {
 }
 
 impl Controller {
+	#[allow(dead_code)]
 	pub(crate) async fn testpost(&self, data: TestPostParam) -> anyhow::Result<&'static str> {
 		log::debug!("{:#?}", data);
 		return Ok("Hello world!");
@@ -58,6 +60,7 @@ impl Controller {
 }
 
 impl Controller {
+	#[allow(dead_code)]
 	pub(crate) async fn db(&self) -> anyhow::Result<serde_json::Value> {
 		type Table = crate::db::postgres::tb01sys::Tb01Sys;
 		let state = crate::get_state().await;
@@ -75,6 +78,7 @@ impl Controller {
 pub(crate) struct Db2Param {}
 
 impl Controller {
+	#[allow(dead_code)]
 	pub(crate) async fn db2(&self, param: Db2Param) -> anyhow::Result<serde_json::Value> {
 		log::debug!("db2/param {:#?}", param);
 		#[derive(Debug, serde::Serialize)]
@@ -97,5 +101,24 @@ impl Controller {
 		let data = data.pop().context("Could not get data")?;
 		log::debug!("{:#?}", data);
 		return Ok(serde_json::json!(data));
+	}
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub(crate) struct Db3Param {}
+
+impl Controller {
+	#[allow(dead_code)]
+	pub(crate) async fn db3(&self, param: Db3Param) -> anyhow::Result<serde_json::Value> {
+		log::debug!("db3/param {:#?}", param);
+		type Table = crate::db::mssql::sys_user::SysUser;
+		let state = crate::get_state().await;
+		let client = state.pg.as_ref(); // !!! should be mssql client
+		let rows = Table::all().limit(3).run(client).await?;
+		let row = rows.first().context("No row")?;
+		dbg!(row);
+		return Ok(serde_json::json!({
+			"foo": "bar"
+		}));
 	}
 }
