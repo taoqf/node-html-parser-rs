@@ -23,7 +23,7 @@ pub(crate) struct A01Param {}
 
 impl Controller {
 	pub(crate) async fn a001(&self, param: A01Param) -> anyhow::Result<serde_json::Value> {
-		log::debug!("c000/param {:#?}", param);
+		log::debug!("c001/param {:#?}", param);
 		return Ok(serde_json::json!({}));
 	}
 	pub(crate) async fn a002(&self) -> anyhow::Result<serde_json::Value> {
