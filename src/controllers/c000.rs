@@ -19,19 +19,12 @@ pub(crate) async fn get_ctrl() -> &'static Controller {
 }
 
 #[derive(Debug, serde::Deserialize)]
-pub(crate) struct A00Param {}
+pub(crate) struct A01Param {}
 
 impl Controller {
-	pub(crate) async fn a000(&self, param: A00Param) -> anyhow::Result<serde_json::Value> {
+	pub(crate) async fn a001(&self, param: A01Param) -> anyhow::Result<serde_json::Value> {
 		log::debug!("c000/param {:#?}", param);
 		return Ok(serde_json::json!({}));
-	}
-	pub(crate) async fn a001(&self) -> anyhow::Result<serde_json::Value> {
-		log::debug!("c002");
-		let num = "mm".parse::<i32>()?;
-		return Ok(serde_json::json!({
-			"num":num
-		}));
 	}
 	pub(crate) async fn a002(&self) -> anyhow::Result<serde_json::Value> {
 		log::debug!("c002");

@@ -23,9 +23,8 @@ async fn main() {
 					.wrap(actix_web::middleware::from_fn(auth_middleware))
 					.service(
 						actix_web::web::scope("g000")
-							.service(api::g000::s000::a000)
-							.service(api::g000::s000::a001)
-							.service(api::g000::s000::a002),
+							.service(api::g000::s001::a001)
+							.service(api::g000::s001::a002),
 					),
 			)
 	})
