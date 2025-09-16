@@ -17,7 +17,7 @@ services:
       dockerfile: .devcontainer/app
 
   db:
-    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/postgres:latest
+    image: docker.cnb.cool/mmstudio666/images/postgres:latest
     environment:
       - POSTGRES_DB=${DB_NAME:-mm}
       - POSTGRES_USER=${DB_USER:-mm}
@@ -26,7 +26,7 @@ services:
       - ../init.d/mm.sql:/docker-entrypoint-initdb.d/mm.sql
 
   nginx:
-    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/nginx:latest
+    image: docker.cnb.cool/mmstudio666/images/nginx:latest
     environment:
       - NGINX_PORT=${NGINX_PORT:-3456}
       # - NGINX_BASEPATH=${NGINX_BASEPATH:-mm}
@@ -38,7 +38,7 @@ services:
       - ./nginx.conf:/etc/nginx/templates/default.conf.template
 
   doccode:
-    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/doccode:latest
+    image: docker.cnb.cool/mmstudio666/images/doccode:latest
     environment:
       - DOCCODE_TB=${DOCCODE_TB:-tb01doccode}
       - DOCCODE_PORT=${DOCCODE_PORT:-8090}
@@ -49,13 +49,13 @@ services:
       - DOCCODE_DBPORT=${DOCCODE_DBPORT:-5432}
 
   adminer:
-    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/adminer:latest
+    image: docker.cnb.cool/mmstudio666/images/adminer:latest
 
   minio:
-    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/minio:latest
+    image: docker.cnb.cool/mmstudio666/images/minio:latest
     environment:
       - MINIO_ROOT_USER=${MINIO_USER:-mmstudio}
       - MINIO_ROOT_PASSWORD=${MINIO_PSWD:-mmstudio}
 
   fileview:
-    image: mmstudio01-docker.pkg.coding.net/mmstudio/mm/fileview:latest
+    image: docker.cnb.cool/mmstudio666/images/fileview:latest

@@ -1,4 +1,4 @@
-FROM mmstudio01-docker.pkg.coding.net/mmstudio/mm/rust:latest
+FROM docker.cnb.cool/mmstudio666/images/rust:latest
 
 WORKDIR /mm
 
