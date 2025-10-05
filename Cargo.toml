@@ -2,6 +2,15 @@
 name = "node-html-parser"
 version = "0.1.0"
 edition = "2021"
+description = "Fast HTML parser for Rust & WASM producing a lightweight DOM with CSS selector querying."
+license = "MIT"
+repository = "https://github.com/taoqf/node-html-parser-rs"
+documentation = "https://docs.rs/node-html-parser"
+readme = "README.md"
+keywords = ["html", "parser", "dom", "css", "wasm"]
+categories = ["parser-implementations", "web-programming", "wasm"]
+# Trim crate size: exclude build artefacts, dumps, generated wasm pkg, local scripts & db
+exclude = ["core.*", "scripts/*", "db/*", "init.d/*", "target/*", "pkg/*"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
