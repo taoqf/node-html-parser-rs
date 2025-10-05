@@ -1,74 +1,35 @@
 [package]
-name = "mm"
+name = "node-html-parser"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["parallel"]
+parallel = ["rayon"]
+# wasm feature: disable rayon usage by not enabling parallel, add wasm related helpers
+wasm = ["wasm-bindgen", "console_error_panic_hook"]
 
 [dependencies]
-dotenvy = "0.15.7"
-log = "0.4.26"
-log4rs = "1.3.0"
-chrono = "0.4.40"
-urlencoding = "2.1.3"
-serde_json = "1.0"
-# sea-orm = "1.1.3"
-# canyon_sql = "0.5.1"
-rust_decimal = "1.36.0"
-rust_decimal_macros = "1.36.0"
-rayon = "1.10.0"
-actix-web = "4.10.2"
 regex = "1.11.1"
 futures = "0.3.31"
-bytes = "1.10.1"
-# md5 = "0.7.0"
 percent-encoding = "2.3.1"
-lazy_static = "1.5.0"
-rust-crypto = "0.2.36"
 anyhow = "1.0.98"
-actix-web-codegen = "4.3.0"
-# diesel = { version = "2.2.6", features = ["postgres"] }
+wasm-bindgen = { version = "0.2", optional = true }
+# rayon 放到可选
+rayon = { version = "1.10.0", optional = true }
+console_error_panic_hook = { version = "0.1", optional = true }
+html-escape = "0.2"
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = "1.0"
 
-# [dependencies.deadpool-tiberius]
-# version = "0.1.8"
-# features = ["bigdecimal", "chrono", "native-tls", "opentls", "rust_decimal"]
-# features = ["bigdecimal", ,"chrono","native-tls","opentls","rust_decimal","rustls","sql-browser","tds73","time","winauth"]
-# [dependencies.axum]
-# version = "0.8.1"
-# features = ["json"]
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
 
-[dependencies.tokio]
-version = "1.44.1"
-features = ["full"]
-
-[dependencies.tiberius]
-version = "0.12.3"
-features = ["rust_decimal"]
-
-[dependencies.reqwest]
-version = "0.12.14"
-features = ["json", "multipart"]
-
-[dependencies.serde]
-version = "1.0"
-features = ["derive"]
-
-[dependencies.sqlx]
-version = "0.8.3"
-features = ["chrono", "runtime-async-std", "rust_decimal", "postgres", "json"]
-
-[dependencies.welds]
-version = "0.4.13"
-features = ["postgres", "mysql"]
-# features = ["mssql", "postgres", "mysql"]
-
-[dependencies.welds-connections]
-version = "0.4.13"
-features = ["postgres", "mysql"]
-# features = ["mssql", "mssql-rust_decimal", "postgres", "mysql"]
-
-[dependencies.uuid]
-version = "1.16.0"
-features = [
-	"v4",                # Lets you generate random UUIDs
-	"fast-rng",          # Use a faster (but still sufficiently random) RNG
-	"macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
-]
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = "z"
+strip = true

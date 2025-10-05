@@ -1,5 +1,7 @@
 FROM docker.cnb.cool/mmstudio666/images/rust:latest
 
+RUN rustup target add wasm32-unknown-unknown && cargo install wasm-pack wasm-bindgen-cli
+
 WORKDIR /mm
 
 ADD . .
