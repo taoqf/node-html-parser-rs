@@ -12,6 +12,9 @@ categories = ["parser-implementations", "web-programming", "wasm"]
 # Trim crate size: exclude build artefacts, dumps, generated wasm pkg, local scripts & db
 exclude = ["core.*", "scripts/*", "db/*", "init.d/*", "target/*", "pkg/*"]
 
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 
@@ -19,10 +22,11 @@ crate-type = ["cdylib", "rlib"]
 default = ["parallel"]
 parallel = ["rayon"]
 # wasm feature: disable rayon usage by not enabling parallel, add wasm related helpers
-wasm = ["wasm-bindgen", "console_error_panic_hook"]
+wasm = ["wasm-bindgen", "console_error_panic_hook", "js-sys"]
 
 [dependencies]
 regex = "1.11.1"
+js-sys = { version = "0.3", optional = true }
 futures = "0.3.31"
 percent-encoding = "2.3.1"
 anyhow = "1.0.98"

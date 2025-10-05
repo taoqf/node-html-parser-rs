@@ -11,3 +11,9 @@ pub use dom::node::Node;
 pub use dom::node_type::NodeType;
 pub use dom::text::TextNode;
 pub use parser::{parse, parse_with_options, valid, Options};
+
+// wasm feature 导出
+#[cfg(feature = "wasm")]
+mod wasm_api;
+#[cfg(feature = "wasm")]
+pub use wasm_api::*;
