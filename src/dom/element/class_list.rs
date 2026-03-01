@@ -85,11 +85,4 @@ impl HTMLElement {
 			self.class_cache = Some(new_tokens);
 		}
 	}
-
-	fn sync_class_attr(&mut self) {
-		if let Some(cache) = &self.class_cache {
-			let joined = cache.join(" ");
-			self.set_attr("class", &joined);
-		}
-	}
 }

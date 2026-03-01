@@ -12,6 +12,7 @@ impl HTMLElement {
 		} else {
 			format!(" {}", self.raw_attrs.trim())
 		};
+		let should_normalize = self.attrs_modified;
 		if self.is_void {
 			if self.void_add_slash {
 				// JS VoidTag.formatNode: 若 addClosingSlash 且存在属性且 attrs 不以空格结尾，补一个空格再加 '/'
@@ -21,8 +22,10 @@ impl HTMLElement {
 				// 3. 若 attrs 末尾已经是空格（极少数构造），直接拼接 '/'
 				let mut norm_attrs = if attrs.is_empty() {
 					String::new()
+				} else if should_normalize {
+					normalize_attr_quotes(&attrs, true)
 				} else {
-					normalize_attr_quotes(&attrs)
+					normalize_attr_quotes(&attrs, false)
 				};
 				// 局部策略：为 void 且需要加 '/' 的情况下，尽量将单引号属性值改成双引号，以匹配 JS 测试（img src="x.png" />）。
 				if !norm_attrs.is_empty() {
@@ -76,8 +79,10 @@ impl HTMLElement {
 			} else {
 				let norm_attrs = if attrs.is_empty() {
 					String::new()
+				} else if should_normalize {
+					normalize_attr_quotes(&attrs, true)
 				} else {
-					normalize_attr_quotes(&attrs)
+					normalize_attr_quotes(&attrs, false)
 				};
 				format!("<{}{}>", tag, norm_attrs)
 			}
@@ -85,8 +90,10 @@ impl HTMLElement {
 			// 对于非 void 元素，也需要规范化属性引号并确保属性间有空格
 			let norm_attrs = if attrs.is_empty() {
 				String::new()
+			} else if should_normalize {
+				normalize_attr_quotes(&attrs, true)
 			} else {
-				normalize_attr_quotes(&attrs)
+				normalize_attr_quotes(&attrs, false)
 			};
 			// 兼容 JS 行为：如果该元素是被后续标签自动闭合，且本身没有子节点（空），原输入中不存在显式关闭标签，
 			// 则保留原样仅输出起始标签（如 <ul><li><li></ul> 中的两个 <li>）。

@@ -1,9 +1,9 @@
 use super::main::HTMLElement;
 use crate::dom::node::Node;
+use std::sync::OnceLock;
 
-// （占位）未来若需要对子节点 map/reduce 并行，可在启用 parallel 特性时引入 rayon::ParallelIterator。
-#[cfg(feature = "parallel")]
-use rayon::prelude::*; // 预留：未来可将同级 Element 子树收集并行化
+// 缓存文本处理的正则表达式
+static WHITESPACE_REGEX: OnceLock<regex::Regex> = OnceLock::new();
 
 impl HTMLElement {
 	pub fn structured_text(&self) -> String {
@@ -136,8 +136,8 @@ impl HTMLElement {
 			.filter(|b| !b.parts.is_empty())
 			.map(|b| {
 				let joined = b.parts.join("");
-				regex::Regex::new(r"\s{2,}")
-					.unwrap()
+				WHITESPACE_REGEX
+					.get_or_init(|| regex::Regex::new(r"\s{2,}").unwrap())
 					.replace_all(&joined, " ")
 					.to_string()
 			})
@@ -145,25 +145,5 @@ impl HTMLElement {
 			.join("\n")
 			.trim_end()
 			.to_string()
-	}
-
-	fn collect_structured_text(&self, buf: &mut String, is_root: bool) {
-		for (i, child) in self.children.iter().enumerate() {
-			match child {
-				Node::Text(t) => {
-					let txt = html_escape::decode_html_entities(&t.raw);
-					if !txt.trim().is_empty() {
-						buf.push_str(txt.trim());
-						if i + 1 < self.children.len() {
-							buf.push('\n');
-						}
-					}
-				}
-				Node::Element(e) => {
-					e.collect_structured_text(buf, false);
-				}
-				Node::Comment(_) => {}
-			}
-		}
 	}
 }

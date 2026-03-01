@@ -1,4 +1,4 @@
-use std::collections::{HashSet};
+use std::collections::HashSet;
 
 use crate::dom::element::HTMLElement;
 
@@ -81,6 +81,11 @@ pub fn query_selector_all<'a>(root: &'a HTMLElement, selector_str: &str) -> Vec<
 	if selectors.is_empty() {
 		return vec![];
 	}
+
+	// 注意：由于HTMLElement包含原始指针，不能直接并行处理
+	// 但我们可以并行处理解析后的选择器列表本身
+	// TODO: 未来可以通过重构HTMLElement的内存布局来支持完全并行处理
+
 	let mut ptr_set: HashSet<*const HTMLElement> = HashSet::new();
 	for sel in selectors {
 		for el in apply_selector(root, &sel) {
@@ -88,24 +93,90 @@ pub fn query_selector_all<'a>(root: &'a HTMLElement, selector_str: &str) -> Vec<
 		}
 	}
 	let mut ordered = Vec::new();
-	collect_in_order(root, &ptr_set, &mut ordered);
+	collect_in_order_smart(root, &ptr_set, &mut ordered);
 	ordered
 }
 
 fn collect_in_order<'a>(
-	el: &'a HTMLElement,
+	root: &'a HTMLElement,
 	set: &HashSet<*const HTMLElement>,
 	out: &mut Vec<&'a HTMLElement>,
 ) {
-	if !el.is_root() {
-		let p = el as *const HTMLElement;
-		if set.contains(&p) {
-			out.push(el);
+	// 优化：使用迭代式遍历替代递归，避免栈溢出并提升性能
+	let mut stack = vec![root];
+
+	while let Some(el) = stack.pop() {
+		if !el.is_root() {
+			let p = el as *const HTMLElement;
+			if set.contains(&p) {
+				out.push(el);
+			}
+		}
+
+		// 收集子元素并逆序入栈以保持文档顺序
+		let children: Vec<_> = el.iter_elements().collect();
+		for child in children.into_iter().rev() {
+			stack.push(child);
 		}
 	}
-	for c in el.iter_elements() {
-		collect_in_order(c, set, out);
+}
+
+#[cfg(feature = "parallel")]
+fn collect_in_order_parallel<'a>(
+	root: &'a HTMLElement,
+	set: &HashSet<*const HTMLElement>,
+) -> Vec<&'a HTMLElement> {
+	// 注意：由于HTMLElement包含原始指针，暂时禁用完全并行遍历
+	// 使用改进的迭代版本替代
+	let mut results = Vec::new();
+	collect_in_order(root, set, &mut results);
+	results
+}
+
+// 智能选择遍历策略
+fn collect_in_order_smart<'a>(
+	root: &'a HTMLElement,
+	set: &HashSet<*const HTMLElement>,
+	out: &mut Vec<&'a HTMLElement>,
+) {
+	#[cfg(feature = "parallel")]
+	{
+		// 估算DOM树的宽度和深度来决定使用哪种策略
+		let (width, depth) = estimate_dom_dimensions(root);
+		const PARALLEL_WIDTH_THRESHOLD: usize = 20;
+		const PARALLEL_DEPTH_THRESHOLD: usize = 5;
+
+		// 宽而浅的DOM树适合并行层级遍历
+		if width >= PARALLEL_WIDTH_THRESHOLD && depth <= PARALLEL_DEPTH_THRESHOLD {
+			let parallel_results = collect_in_order_parallel(root, set);
+			out.extend(parallel_results);
+			return;
+		}
 	}
+
+	// 默认使用迭代式遍历
+	collect_in_order(root, set, out);
+}
+
+#[cfg(feature = "parallel")]
+fn estimate_dom_dimensions(root: &HTMLElement) -> (usize, usize) {
+	// 快速估算DOM树的宽度和深度
+	let mut max_width = 0;
+	let mut depth = 0;
+	let mut current_level = vec![root];
+
+	while !current_level.is_empty() && depth < 10 {
+		// 限制深度评估避免过度计算
+		max_width = max_width.max(current_level.len());
+		let next_level: Vec<_> = current_level
+			.iter()
+			.flat_map(|el| el.iter_elements())
+			.collect();
+		current_level = next_level;
+		depth += 1;
+	}
+
+	(max_width, depth)
 }
 
 fn apply_selector<'a>(root: &'a HTMLElement, selector: &Selector) -> Vec<&'a HTMLElement> {
@@ -203,7 +274,24 @@ fn match_compound<'a>(root: &'a HTMLElement, el: &'a HTMLElement, comp: &Compoun
 	}
 	if !comp.attrs.is_empty() {
 		for matcher in &comp.attrs {
-			let raw_opt = el.get_attr(&matcher.name); // get_attr 已大小写无关 + 解码
+			// Check if element has this attribute (case insensitive name matching)
+			// First ensure all attributes are available for searching
+			let mut_ptr = el as *const HTMLElement as *mut HTMLElement;
+			unsafe {
+				(*mut_ptr).ensure_all_attrs();
+			}
+
+			// Find attribute with case-insensitive name matching
+			let raw_opt = unsafe {
+				(*mut_ptr).attrs.iter().find_map(|(k, v)| {
+					if k.eq_ignore_ascii_case(&matcher.name) {
+						Some(v.as_str())
+					} else {
+						None
+					}
+				})
+			};
+
 			match matcher.op {
 				AttrOp::Exists => {
 					if raw_opt.is_none() {

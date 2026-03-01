@@ -25,7 +25,7 @@ fn script_block_preserves_raw_inner() {
 
 #[test]
 fn style_block_entity_and_tag_like_text() {
-	let mut opts = Options::default();
+	let opts = Options::default();
 	let html = "<style>.cls > p { content: '<span>'; }</style>";
 	let root = parse_with_options(html, &opts);
 	let style = root.first_element_child().unwrap();

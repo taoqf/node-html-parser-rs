@@ -1,4 +1,4 @@
-use node_html_parser::{parse, parse_with_options, Options};
+use node_html_parser::parse;
 
 #[test]
 fn issue_214_table_tagname_uppercase() {

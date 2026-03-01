@@ -1,6 +1,10 @@
 use super::main::HTMLElement;
 use regex::Regex;
 use std::collections::HashMap;
+use std::sync::OnceLock;
+
+// 缓存属性解析相关的正则表达式
+static ATTR_PARSE_REGEX: OnceLock<Regex> = OnceLock::new();
 
 impl HTMLElement {
 	pub fn attrs_lower_decoded(&mut self) -> HashMap<String, String> {
@@ -37,7 +41,7 @@ impl HTMLElement {
 		}
 	}
 	pub fn remove_attribute(&mut self, key: &str) {
-		self.ensure_raw_attributes();
+		self.build_raw_cache();
 		let mut raw_map = self.cache_raw_map.take().unwrap_or_default();
 		let target = key.to_lowercase();
 		raw_map.retain(|k, _| k.to_lowercase() != target);
@@ -63,19 +67,32 @@ impl HTMLElement {
 			self.class_cache = None;
 		}
 		self.attrs_complete = true; // attrs now reflect full set
+		self.attrs_modified = true; // Mark attributes as modified
 	}
 
 	pub fn get_attr(&self, key: &str) -> Option<&str> {
-		// 需要可变以便确保延迟属性完成解析
+		// First try already parsed attributes
 		let k = key.to_lowercase();
-		let mut_ptr = self as *const HTMLElement as *mut HTMLElement; // unsafe 以允许内部完成解析
-		unsafe {
-			(*mut_ptr).ensure_all_attrs();
+		if let Some(found) = self.attrs.iter().find(|(kk, _)| *kk == k) {
+			return Some(found.1.as_str());
 		}
-		self.attrs
-			.iter()
-			.find(|(kk, _)| *kk == k)
-			.map(|(_, v)| v.as_str())
+
+		// If not found and attrs not complete, we need to ensure parsing
+		if !self.attrs_complete && !self.raw_attrs.is_empty() {
+			// Use unsafe to trigger ensure_all_attrs on self
+			let mut_ptr = self as *const HTMLElement as *mut HTMLElement;
+			unsafe {
+				(*mut_ptr).ensure_all_attrs();
+				// Now search again in the updated attrs
+				return (*mut_ptr)
+					.attrs
+					.iter()
+					.find(|(kk, _)| *kk == k)
+					.map(|(_, v)| v.as_str());
+			}
+		}
+
+		None
 	}
 	pub fn has_attr(&self, key: &str) -> bool {
 		self.get_attr(key).is_some()
@@ -106,9 +123,13 @@ impl HTMLElement {
 		}
 	}
 	/// Convenience: remove the id attribute (safe wrapper for tests parity with JS removeAttribute('id'))
-	pub fn remove_id(&mut self) { self.remove_attribute("id"); }
+	pub fn remove_id(&mut self) {
+		self.remove_attribute("id");
+	}
 	/// Convenience: set id attribute (safe wrapper to avoid direct raw mutation in tests)
-	pub fn set_id(&mut self, id: &str) { self.set_attribute("id", id); }
+	pub fn set_id(&mut self, id: &str) {
+		self.set_attribute("id", id);
+	}
 	pub(super) fn rebuild_raw_attrs(&mut self) {
 		// 保持原有顺序，使用与 JS Quote 逻辑更接近的方式（参见 nodes/html.ts quoteAttribute）
 		fn quote_attr(src: &str) -> String {
@@ -143,38 +164,10 @@ impl HTMLElement {
 			.join(" ");
 	}
 
-	// --- JS style attribute parsing (rawAttributes) ---
-	fn ensure_raw_attributes(&mut self) {
-		if self.cache_raw_map.is_some() {
-			return;
-		}
-		let mut map = HashMap::new();
-		if !self.raw_attrs.is_empty() {
-			let re = regex::Regex::new(
-				r#"([a-zA-Z()\[\]#@$.?:][a-zA-Z0-9-._:()\[\]#]*)(?:\s*=\s*((?:'[^']*')|(?:"[^"]*")|\S+))?"#,
-			)
-			.unwrap();
-			for cap in re.captures_iter(&self.raw_attrs) {
-				let key = cap.get(1).unwrap().as_str();
-				let mut val = cap.get(2).map(|m| m.as_str()).unwrap_or("").to_string();
-				if !val.is_empty() {
-					if (val.starts_with('\"') && val.ends_with('\"'))
-						|| (val.starts_with('\'') && val.ends_with('\''))
-					{
-						val = val[1..val.len() - 1].to_string();
-					}
-				}
-				// only first occurrence kept (JS behavior)
-				map.entry(key.to_string()).or_insert(val);
-			}
-		}
-		self.cache_raw_map = Some(map);
-	}
-
 	pub fn attributes(&mut self) -> std::collections::HashMap<String, String> {
 		// JS: Element.attributes preserves original attribute name casing/order (first occurrence) while returning decoded values.
 		// We approximate with a HashMap (order not guaranteed) but keep original key casing from raw parsing.
-		self.ensure_raw_attributes();
+		self.build_raw_cache();
 		let mut out = std::collections::HashMap::new();
 		if let Some(raw) = &self.cache_raw_map {
 			for (orig_k, raw_v) in raw.iter() {
@@ -186,11 +179,13 @@ impl HTMLElement {
 		out
 	}
 	pub fn raw_attributes(&mut self) -> HashMap<String, String> {
-		self.ensure_raw_attributes();
+		self.build_raw_cache();
 		self.cache_raw_map.clone().unwrap_or_default()
 	}
 	/// Read-only snapshot of the original raw attribute string (public accessor for tests like issue 136)
-	pub fn raw_attrs_str(&self) -> &str { &self.raw_attrs }
+	pub fn raw_attrs_str(&self) -> &str {
+		&self.raw_attrs
+	}
 
 	pub fn get_attribute(&mut self, key: &str) -> Option<String> {
 		self.ensure_lower_decoded();
@@ -202,68 +197,81 @@ impl HTMLElement {
 	}
 
 	pub fn set_attribute(&mut self, key: &str, value: &str) {
-		// JS preserves original attribute order; new attributes appended.
-		// Strategy: re-parse current raw_attrs to ordered vector of keys, update/append target, rebuild string.
-		self.ensure_raw_attributes();
-		let raw_snapshot = self.raw_attrs.clone();
-		let re = regex::Regex::new(
-			r#"([a-zA-Z()\[\]#@$.?:][a-zA-Z0-9-._:()\[\]#]*)(?:\s*=\s*((?:'[^']*')|(?:\"[^\"]*\")|[^\s>]+))?"#,
-		).unwrap();
-		let mut order: Vec<String> = Vec::new();
-		let mut seen_ci: Vec<String> = Vec::new();
-		for cap in re.captures_iter(&raw_snapshot) {
-			let k = cap.get(1).unwrap().as_str().to_string();
-			let k_ci = k.to_lowercase();
-			if !seen_ci.iter().any(|x| x == &k_ci) {
-				order.push(k.clone());
-				seen_ci.push(k_ci);
-			}
-		}
-		// Build map (original casing -> raw value) from existing cache_raw_map (original keys) to preserve first casing.
-		let mut new_map: std::collections::HashMap<String, String> =
-			std::collections::HashMap::new();
-		if let Some(raw) = &self.cache_raw_map {
-			for (k, v) in raw.iter() {
-				new_map.insert(k.clone(), v.clone());
-			}
-		}
-		// Determine if key exists case-insensitively; if so update that original key.
-		let mut target_original: Option<String> = None;
-		for k in order.iter() {
-			if k.eq_ignore_ascii_case(key) {
-				target_original = Some(k.clone());
-				break;
-			}
-		}
-		if let Some(orig) = target_original {
-			new_map.insert(orig, value.to_string());
+		// Update raw_attrs string representation, preserving original attribute order
+		let quoted_value = if value.is_empty() {
+			None
 		} else {
-			order.push(key.to_string());
-			new_map.insert(key.to_string(), value.to_string());
-		}
-		// Reconstruct raw_attrs following order vector.
-		let mut parts = Vec::with_capacity(order.len());
-		for k in &order {
-			if let Some(v) = new_map.get(k) {
-				if v.is_empty() {
-					parts.push(k.clone());
+			Some(quote_attribute(value))
+		};
+
+		if self.raw_attrs.is_empty() {
+			if let Some(qv) = quoted_value {
+				self.raw_attrs = format!("{}={}", key, qv);
+			} else {
+				self.raw_attrs = key.to_string();
+			}
+		} else {
+			// Parse existing attributes to preserve order
+			let re = ATTR_PARSE_REGEX.get_or_init(|| {
+				regex::Regex::new(
+					r#"([a-zA-Z()\[\]#@$.?:][a-zA-Z0-9-._:()\[\]#]*)(?:\s*=\s*((?:'[^']*')|(?:"[^"]*")|\S+))?"#,
+				)
+				.unwrap()
+			});
+
+			let mut result_attrs = Vec::new();
+			let mut found = false;
+
+			for cap in re.captures_iter(&self.raw_attrs) {
+				let existing_key = cap.get(1).unwrap().as_str();
+				if existing_key.eq_ignore_ascii_case(key) {
+					// Replace this attribute, preserve original case
+					if let Some(qv) = &quoted_value {
+						result_attrs.push(format!("{}={}", existing_key, qv));
+					} else {
+						result_attrs.push(existing_key.to_string());
+					}
+					found = true;
 				} else {
-					parts.push(format!("{}={}", k, quote_attribute(v)));
+					// Keep existing attribute as-is
+					let existing_val = cap.get(2).map(|m| m.as_str()).unwrap_or("");
+					if existing_val.is_empty() {
+						result_attrs.push(existing_key.to_string());
+					} else {
+						result_attrs.push(format!("{}={}", existing_key, existing_val));
+					}
 				}
 			}
+
+			// If not found, add at the end
+			if !found {
+				if let Some(qv) = quoted_value {
+					result_attrs.push(format!("{}={}", key, qv));
+				} else {
+					result_attrs.push(key.to_string());
+				}
+			}
+
+			self.raw_attrs = result_attrs.join(" ");
 		}
-		self.raw_attrs = parts.join(" ");
-		self.cache_raw_map = None; // force rebuild
-		self.cache_lower_decoded = None;
-		// sync structured attrs (store lowercase key, decoded value as get_attr expects)
+
+		// Update structured attrs with decoded value
+		self.ensure_all_attrs();
 		let lk = key.to_lowercase();
 		let decoded_val = html_escape::decode_html_entities(value).to_string();
 		if let Some(kv) = self.attrs.iter_mut().find(|(k, _)| *k == lk) {
-			kv.1 = decoded_val.clone();
+			kv.1 = decoded_val;
 		} else {
-			self.attrs.push((lk.clone(), decoded_val.clone()));
+			self.attrs.push((lk, decoded_val));
 		}
+
+		// Clear caches to force rebuild
+		self.cache_raw_map = None;
+		self.cache_lower_decoded = None;
 		self.attrs_complete = true;
+		self.attrs_modified = true; // Mark attributes as modified
+
+		// Update element-specific caches
 		if key.eq_ignore_ascii_case("id") {
 			self.id = value.to_string();
 		}
@@ -284,76 +292,66 @@ impl HTMLElement {
 		if self.attrs_complete {
 			return;
 		}
-		if self.raw_attrs.is_empty() {
-			self.attrs_complete = true;
-			return;
-		}
-		static ATTR_RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-		let re = ATTR_RE.get_or_init(|| {
-			regex::Regex::new(
-				r#"([a-zA-Z()\[\]#@$.?:][a-zA-Z0-9-._:()\[\]#]*)(?:\s*=\s*((?:'[^']*')|(?:"[^"]*")|\S+))?"#,
-			)
-			.unwrap()
-		});
-		for cap in re.captures_iter(&self.raw_attrs) {
-			let key = cap.get(1).unwrap().as_str();
-			let val = cap.get(2).map(|m| m.as_str()).unwrap_or("");
-			let unquoted = if val.starts_with('"') || val.starts_with('\'') {
-				&val[1..val.len() - 1]
-			} else {
-				val
-			};
-			let lk = key.to_lowercase();
-			if !self.attrs.iter().any(|(k, _)| k == &lk) {
-				self.attrs
-					.push((lk, html_escape::decode_html_entities(unquoted).to_string()));
+
+		// Clear existing attrs and rebuild from raw_attrs string
+		self.attrs.clear();
+		self.build_raw_cache();
+		if let Some(ref raw_map) = self.cache_raw_map {
+			for (key, value) in raw_map.iter() {
+				let decoded_val = html_escape::decode_html_entities(value).to_string();
+				self.attrs.push((key.to_lowercase(), decoded_val));
 			}
 		}
+
 		self.attrs_complete = true;
 	}
 	fn build_raw_cache(&mut self) {
-		let attr_re = Regex::new(
-			r#"([a-zA-Z()[\]#@$.?:][a-zA-Z0-9-._:()[\]#]*)(?:\s*=\s*((?:'[^']*')|(?:\"[^\"]*\")|[^\s>]+))?"#,
-		)
-		.unwrap();
-		let mut raw_map = HashMap::new();
-		for cap in attr_re.captures_iter(&self.raw_attrs) {
-			let key = cap.get(1).unwrap().as_str();
-			let value = cap.get(2).map(|m| m.as_str()).unwrap_or("");
-			let mut chosen = key.to_string();
-			if raw_map.contains_key(&chosen) {
-				let mut suffix = 1;
-				while raw_map.contains_key(&format!("{}#dup{}", chosen, suffix)) {
-					suffix += 1;
-				}
-				chosen = format!("{}#dup{}", chosen, suffix);
-			}
-			let mut value = value.trim();
-			if (value.starts_with('"') && value.ends_with('"'))
-				|| (value.starts_with('\'') && value.ends_with('\''))
-			{
-				value = &value[1..value.len() - 1];
-			}
-			raw_map.insert(chosen.clone(), value.to_string());
+		if self.cache_raw_map.is_some() {
+			return;
 		}
-		self.cache_raw_map = Some(raw_map);
+
+		let mut map = HashMap::new();
+		if !self.raw_attrs.is_empty() {
+			let re = ATTR_PARSE_REGEX.get_or_init(|| {
+				regex::Regex::new(
+					r#"([a-zA-Z()\[\]#@$.?:][a-zA-Z0-9-._:()\[\]#]*)(?:\s*=\s*((?:'[^']*')|(?:"[^"]*")|\S+))?"#,
+				)
+				.unwrap()
+			});
+			for cap in re.captures_iter(&self.raw_attrs) {
+				let key = cap.get(1).unwrap().as_str();
+				let mut val = cap.get(2).map(|m| m.as_str()).unwrap_or("").to_string();
+				if !val.is_empty() {
+					if (val.starts_with('\"') && val.ends_with('\"'))
+						|| (val.starts_with('\'') && val.ends_with('\''))
+					{
+						val = val[1..val.len() - 1].to_string();
+					}
+				}
+				// only first occurrence kept (JS behavior)
+				map.entry(key.to_string()).or_insert(val);
+			}
+		}
+		self.cache_raw_map = Some(map);
 	}
 
 	fn ensure_lower_decoded(&mut self) {
 		if self.cache_lower_decoded.is_some() {
 			return;
 		}
-		self.ensure_raw_attributes();
-		let mut lower = HashMap::new();
-		if let Some(raw) = &self.cache_raw_map {
-			for (k, v) in raw {
-				lower.insert(
-					k.to_lowercase(),
-					html_escape::decode_html_entities(v).to_string(),
-				);
+
+		self.build_raw_cache();
+		let mut lower_decoded = HashMap::new();
+
+		if let Some(ref raw_map) = self.cache_raw_map {
+			for (key, value) in raw_map.iter() {
+				let decoded_val = html_escape::decode_html_entities(value).to_string();
+				let lower_key = key.to_lowercase();
+				lower_decoded.insert(lower_key, decoded_val);
 			}
 		}
-		self.cache_lower_decoded = Some(lower);
+
+		self.cache_lower_decoded = Some(lower_decoded);
 	}
 }
 

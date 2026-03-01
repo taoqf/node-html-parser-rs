@@ -29,70 +29,6 @@ impl HTMLElement {
 		}
 	}
 
-	/// 下一个元素兄弟。
-	pub fn next_element_sibling(&self) -> Option<&HTMLElement> {
-		let parent = self.parent()?;
-		let mut seen = false;
-		let self_ptr = self as *const HTMLElement;
-		for child in &parent.children {
-			if let Node::Element(e) = child {
-				let ptr: *const HTMLElement = &**e;
-				if seen {
-					return Some(e);
-				}
-				if ptr == self_ptr {
-					seen = true;
-				}
-			}
-		}
-		None
-	}
-	/// 上一个元素兄弟。
-	pub fn previous_element_sibling(&self) -> Option<&HTMLElement> {
-		let parent = self.parent()?;
-		let self_ptr = self as *const HTMLElement;
-		let mut prev: Option<&HTMLElement> = None;
-		for child in &parent.children {
-			if let Node::Element(e) = child {
-				let ptr: *const HTMLElement = &**e;
-				if ptr == self_ptr {
-					return prev;
-				}
-				prev = Some(e);
-			}
-		}
-		None
-	}
-
-	pub(super) fn index_in_parent(&self) -> Option<usize> {
-		let parent = self.parent()?;
-		let self_ptr = self as *const HTMLElement;
-		for (i, child) in parent.children.iter().enumerate() {
-			if let Node::Element(e) = child {
-				let ptr: *const HTMLElement = &**e;
-				if ptr == self_ptr {
-					return Some(i);
-				}
-			}
-		}
-		None
-	}
-
-	/// 下一个兄弟节点（包含文本/注释）。
-	pub fn next_sibling(&self) -> Option<&Node> {
-		let parent = self.parent()?;
-		let idx = self.index_in_parent()?;
-		parent.children.get(idx + 1)
-	}
-	/// 上一个兄弟节点（包含文本/注释）。
-	pub fn previous_sibling(&self) -> Option<&Node> {
-		let parent = self.parent()?;
-		let idx = self.index_in_parent()?;
-		if idx == 0 {
-			return None;
-		}
-		parent.children.get(idx - 1)
-	}
 	/// Insert nodes after this element.
 	pub fn after_nodes(&mut self, mut nodes: Vec<Node>) {
 		let parent_ptr = match self.parent {
@@ -169,6 +105,70 @@ impl HTMLElement {
 		}
 	}
 
+	/// 下一个元素兄弟。
+	pub fn next_element_sibling(&self) -> Option<&HTMLElement> {
+		let parent = self.parent()?;
+		let mut seen = false;
+		let self_ptr = self as *const HTMLElement;
+		for child in &parent.children {
+			if let Node::Element(e) = child {
+				let ptr: *const HTMLElement = &**e;
+				if seen {
+					return Some(e);
+				}
+				if ptr == self_ptr {
+					seen = true;
+				}
+			}
+		}
+		None
+	}
+	/// 上一个元素兄弟。
+	pub fn previous_element_sibling(&self) -> Option<&HTMLElement> {
+		let parent = self.parent()?;
+		let self_ptr = self as *const HTMLElement;
+		let mut prev: Option<&HTMLElement> = None;
+		for child in &parent.children {
+			if let Node::Element(e) = child {
+				let ptr: *const HTMLElement = &**e;
+				if ptr == self_ptr {
+					return prev;
+				}
+				prev = Some(e);
+			}
+		}
+		None
+	}
+
+	pub(super) fn index_in_parent(&self) -> Option<usize> {
+		let parent = self.parent()?;
+		let self_ptr = self as *const HTMLElement;
+		for (i, child) in parent.children.iter().enumerate() {
+			if let Node::Element(e) = child {
+				let ptr: *const HTMLElement = &**e;
+				if ptr == self_ptr {
+					return Some(i);
+				}
+			}
+		}
+		None
+	}
+
+	/// 下一个兄弟节点（包含文本/注释）。
+	pub fn next_sibling(&self) -> Option<&Node> {
+		let parent = self.parent()?;
+		let idx = self.index_in_parent()?;
+		parent.children.get(idx + 1)
+	}
+	/// 上一个兄弟节点（包含文本/注释）。
+	pub fn previous_sibling(&self) -> Option<&Node> {
+		let parent = self.parent()?;
+		let idx = self.index_in_parent()?;
+		if idx == 0 {
+			return None;
+		}
+		parent.children.get(idx - 1)
+	}
 	/// 内部：在当前元素 children 指定 index 插入片段（仅用于自身 afterbegin/beforeend）。
 	pub(super) fn insert_children_at(&mut self, index: usize, html: &str) {
 		let mut nodes = parse_fragment(html);
@@ -460,15 +460,18 @@ impl HTMLElement {
 						parent.children.retain(|c| {
 							if let Node::Element(pe) = c {
 								(&**pe) as *const HTMLElement != elem_ptr
-							} else { true }
+							} else {
+								true
+							}
 						});
 					}
 					e.parent = None; // 临时清空防止错误引用
 				}
 				let self_ptr: *mut HTMLElement = self as *mut HTMLElement;
 				e.parent = Some(self_ptr);
-			},
-			Node::Text(_) | Node::Comment(_) => { /* Text/Comment 按当前实现不跟踪 parent 指针 */ }
+			}
+			Node::Text(_) | Node::Comment(_) => { /* Text/Comment 按当前实现不跟踪 parent 指针 */
+			}
 		}
 		self.children.push(n);
 	}

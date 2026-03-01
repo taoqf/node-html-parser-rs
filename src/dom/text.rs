@@ -1,3 +1,8 @@
+use std::sync::OnceLock;
+
+// 缓存空白字符检测的正则表达式
+static WHITESPACE_REGEX: OnceLock<regex::Regex> = OnceLock::new();
+
 #[derive(Debug, Clone)]
 pub struct TextNode {
 	pub raw: String,
@@ -76,8 +81,8 @@ impl TextNode {
 		self.trimmed_txt_cache.as_ref().unwrap()
 	}
 	pub fn is_whitespace(&self) -> bool {
-		regex::Regex::new(r"^(?:\s|&nbsp;)*$")
-			.unwrap()
+		WHITESPACE_REGEX
+			.get_or_init(|| regex::Regex::new(r"^(?:\s|&nbsp;)*$").unwrap())
 			.is_match(&self.raw)
 	}
 	pub fn text(&self) -> String {

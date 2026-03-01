@@ -4,6 +4,9 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::fmt;
 
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
+
 #[derive(Debug, Clone)]
 pub struct HTMLElement {
 	pub(super) tag_name: Option<String>, // None for root container
@@ -23,6 +26,8 @@ pub struct HTMLElement {
 	pub(super) range: Option<(usize, usize)>,    // (start,end)
 	// 是否已完整解析所有 attrs（延迟解析机制预留，当前解析器初始阶段可只解析部分如 id/class）
 	pub(crate) attrs_complete: bool,
+	// 是否属性已被修改（用于决定序列化时是否需要标准化引号）
+	pub(crate) attrs_modified: bool,
 	pub(crate) parse_comment: bool,
 	pub(crate) parse_lowercase: bool,
 }
@@ -47,16 +52,19 @@ impl HTMLElement {
 			tag_name: tag,
 			raw_attrs,
 			attrs,
-			children: Vec::new(),
+			// 🚀 优化：预分配children容量，减少重新分配
+			children: Vec::with_capacity(2),
 			parent: None,
 			is_void,
 			void_add_slash,
 			cache_raw_map: None,
 			cache_lower_decoded: None,
+
 			id: id_val,
 			class_cache: None,
 			range: None, // will set to Some((-1,-1)) for non-root below
 			attrs_complete: false,
+			attrs_modified: false,
 			parse_comment: false,
 			parse_lowercase: false,
 		}
@@ -323,10 +331,12 @@ impl HTMLElement {
 				void_add_slash: el.void_add_slash,
 				cache_raw_map: None,
 				cache_lower_decoded: None,
+
 				id: el.id.clone(),
 				class_cache: el.class_cache.clone(),
 				range: None,
 				attrs_complete: el.attrs_complete,
+				attrs_modified: el.attrs_modified,
 				parse_comment: el.parse_comment,
 				parse_lowercase: el.parse_lowercase,
 			});
@@ -353,10 +363,12 @@ impl HTMLElement {
 			void_add_slash: self.void_add_slash,
 			cache_raw_map: None,
 			cache_lower_decoded: None,
+
 			id: self.id.clone(),
 			class_cache: self.class_cache.clone(),
 			range: None,
 			attrs_complete: self.attrs_complete,
+			attrs_modified: self.attrs_modified,
 			parse_comment: self.parse_comment,
 			parse_lowercase: self.parse_lowercase,
 		}
@@ -375,6 +387,30 @@ impl HTMLElement {
 	}
 	pub fn range(&self) -> Option<(usize, usize)> {
 		self.range
+	}
+
+	/// 批量处理多个元素的属性解析 (启用parallel特性时使用rayon)
+	/// 注意：由于线程安全约束，暂时使用串行处理
+	#[cfg(feature = "parallel")]
+	pub fn batch_ensure_attributes_safe(elements: &mut [HTMLElement]) {
+		// 暂时使用串行处理以避免线程安全问题
+		for el in elements.iter_mut() {
+			el.ensure_all_attrs();
+		}
+	}
+
+	/// 并行处理文本节点（线程安全版本）
+	#[cfg(feature = "parallel")]
+	pub fn process_text_nodes_parallel(text_nodes: &mut [crate::dom::text::TextNode]) {
+		const PARALLEL_THRESHOLD: usize = 20;
+
+		if text_nodes.len() >= PARALLEL_THRESHOLD {
+			text_nodes.par_iter_mut().for_each(|node| {
+				// 只处理不涉及DOM结构修改的操作
+				let _ = node.is_whitespace();
+				let _ = node.trimmed_raw_text();
+			});
+		}
 	}
 }
 

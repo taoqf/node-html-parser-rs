@@ -9,10 +9,14 @@ pub fn get_quality(token: &InternalSelector) -> i32 {
 		InternalSelector::Pseudo { data, name } => match data {
 			PseudoData::None => 3,
 			PseudoData::SubSelectors(_) => {
-				if matches!(name.as_str(), "has" | "contains" | "icontains") { 0 } else { 2 }
+				if matches!(name.as_str(), "has" | "contains" | "icontains") {
+					0
+				} else {
+					2
+				}
 			}
 			PseudoData::Nth(_) => 3, // nth 自身判定成本中等，先给 3（可再调优）
-		}
+		},
 		_ => -1,
 	}
 }
@@ -33,7 +37,11 @@ fn get_attribute_quality(attr: &AttributeSelector) -> i32 {
 		AttributeAction::Hyphen => 4,
 		AttributeAction::Element => 3,
 	};
-	if attr.ignore_case { base / 2 } else { base }
+	if attr.ignore_case {
+		base / 2
+	} else {
+		base
+	}
 }
 
 pub fn sort_rules(arr: &mut Vec<InternalSelector>) {
@@ -69,9 +77,13 @@ pub fn is_traversal(token: &InternalSelector) -> bool {
 pub fn includes_scope_pseudo(token: &InternalSelector) -> bool {
 	match token {
 		InternalSelector::Pseudo { name, data } => {
-			if name == "scope" { return true; }
+			if name == "scope" {
+				return true;
+			}
 			match data {
-				PseudoData::SubSelectors(groups) => groups.iter().any(|g| g.iter().any(includes_scope_pseudo)),
+				PseudoData::SubSelectors(groups) => {
+					groups.iter().any(|g| g.iter().any(includes_scope_pseudo))
+				}
 				_ => false,
 			}
 		}
