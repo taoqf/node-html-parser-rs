@@ -1,7 +1,7 @@
 services:
-  webserver:
+  app:
     stdin_open: true
-    image: mm.io/${APP_ID:-mm}-web:dev
+    image: mm.io/${APP_ID:-mm}-app:rs
     environment:
       - APP_ID=${APP_ID:-mm}
     volumes:

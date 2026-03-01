@@ -1,6 +1,4 @@
-node_modules
 *.log
-logs/
 target/
 .devcontainer/.cache
 js/

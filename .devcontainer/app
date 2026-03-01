@@ -5,8 +5,3 @@ RUN rustup target add wasm32-unknown-unknown && cargo install wasm-pack wasm-bin
 WORKDIR /mm
 
 ADD . .
-
-# !!! 在Windows上，当前的docker版本会映射错本地路径
-# ENTRYPOINT [ "./.devcontainer/watch.sh" ]
-
-EXPOSE 3000

@@ -3,7 +3,7 @@
 {
 	"name": "mmstudio/dev",
 	"dockerComposeFile": "./docker-compose.yml",
-	"service": "webserver",
+	"service": "app",
 	"workspaceFolder": "/mm",
 	// "postCreateCommand": "pnpm i --prefer-offline && pnpm dev",
 	"customizations": {

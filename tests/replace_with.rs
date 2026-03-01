@@ -20,7 +20,7 @@ where
 
 #[test]
 fn replace_with_attribute_colon() {
-	let mut root = parse("<Div><Input/></Div>");
+	let root = parse("<Div><Input/></Div>");
 	assert_eq!(root.to_string(), "<Div><Input></Input></Div>");
 }
 
