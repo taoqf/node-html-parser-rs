@@ -1,6 +1,6 @@
 [package]
 name = "node-html-parser"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Fast HTML parser for Rust & WASM producing a lightweight DOM with CSS selector querying."
 license = "MIT"
