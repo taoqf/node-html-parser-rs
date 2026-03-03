@@ -403,46 +403,46 @@ Get all attributes of current element. **Notice: do not try to change the return
 
 Corresponding source code start and end indexes (ie [ 0, 40 ])
 
-## WASM / 浏览器 & Node.js 使用
+## WASM / Browser & Node.js Usage
 
-本仓库同时支持：
+This repository supports both:
 
-- 作为普通 Rust 库 (native)
-- 编译为 WebAssembly，在浏览器或 Node.js 中调用
+- As a regular Rust library (native)
+- Compiled to WebAssembly for use in browsers or Node.js
 
-### 构建前准备
+### Prerequisites
 
-1. 安装 wasm 目标
+1. Install the wasm target
 	```bash
 	rustup target add wasm32-unknown-unknown
 	```
-2. （可选）安装 wasm-pack
+2. (Optional) Install wasm-pack
 	```bash
 	cargo install wasm-pack
 	```
 
-### Feature 说明
+### Feature Descriptions
 
-| Feature | 作用 | 默认 | 备注 |
-|---------|------|------|------|
-| parallel | 启用 rayon 并行 | 启用 | wasm 线程需额外配置，建议 wasm 下关闭 |
-| wasm | 启用 wasm-bindgen + panic hook | 关闭 | wasm 构建时启用 |
+| Feature | Purpose | Default | Notes |
+|---------|---------|---------|-------|
+| parallel | Enable rayon parallelism | Enabled | WASM threads need extra configuration, recommended to disable in WASM |
+| wasm | Enable wasm-bindgen + panic hook | Disabled | Enable when building for WASM |
 
-在 wasm 场景下为避免 rayon 线程问题，建议使用：`--no-default-features --features wasm`。
+For WASM scenarios, to avoid rayon threading issues, it's recommended to use: `--no-default-features --features wasm`.
 
-### 使用 wasm-pack 构建（推荐）
+### Building with wasm-pack (Recommended)
 
 ```bash
 wasm-pack build --release --target bundler --no-default-features --features wasm
-# 或 --target web / nodejs / deno 视使用环境而定
+# Or --target web / nodejs / deno depending on your target environment
 ```
 
-输出目录 `pkg/` 中包含：
+The output directory `pkg/` contains:
 
 - `node_html_parser_bg.wasm`
-- 对应 JS 绑定与类型声明
+- Corresponding JS bindings and type declarations
 
-### 浏览器示例
+### Browser Example
 
 ```html
 <script type="module">
@@ -452,7 +452,7 @@ console.log(hello('Browser'));
 </script>
 ```
 
-### Node.js 示例 (ESM)
+### Node.js Example (ESM)
 
 ```js
 import init, { hello } from './pkg/node_html_parser.js';
@@ -460,24 +460,24 @@ await init();
 console.log(hello('Node'));
 ```
 
-### 直接使用 cargo 构建 (无 JS 包装层)
+### Direct cargo build (Without JS wrapper layer)
 
 ```bash
 cargo build --release --target wasm32-unknown-unknown --no-default-features --features wasm
 ```
 
-你需要自己加载 `.wasm` 并处理导出（`wasm-bindgen` 生成包装时不需要）。
+You'll need to load the `.wasm` file and handle exports yourself (not needed when `wasm-bindgen` generates wrappers).
 
-### Panic 与调试
+### Panic & Debugging
 
-启用 `wasm` feature 后自动安装 `console_error_panic_hook`，可在浏览器控制台看到 Rust panic 堆栈。
+When the `wasm` feature is enabled, `console_error_panic_hook` is automatically installed, allowing you to see Rust panic stack traces in the browser console.
 
-### 并行策略
+### Parallelism Strategy
 
-`total_len` 等内部函数在启用 `parallel` 时使用 rayon 并行；在 wasm 构建关闭 `parallel` 时会自动退化为串行。
+Internal functions like `total_len` use rayon parallelism when the `parallel` feature is enabled; when `parallel` is disabled in WASM builds, they automatically fall back to serial execution.
 
-### 未来计划（可选）
+### Future Plans (Optional)
 
-- 导出完整 HTML Parser API 到 wasm
-- 提供更细粒度的 DOM 访问接口
-- 带 wasm 线程支持（SharedArrayBuffer 环境）
+- Export complete HTML Parser API to wasm
+- Provide more fine-grained DOM access interfaces
+- Support WASM threads (SharedArrayBuffer environment)
