@@ -5,6 +5,9 @@ use std::sync::OnceLock;
 
 // 缓存属性解析相关的正则表达式
 static ATTR_PARSE_REGEX: OnceLock<Regex> = OnceLock::new();
+// 缓存 quote_attr 相关正则，避免重复编译
+static QUOTE_ESCAPED_CTRL_REGEX: OnceLock<Regex> = OnceLock::new();
+static QUOTE_STRIP_BS_REGEX: OnceLock<Regex> = OnceLock::new();
 
 impl HTMLElement {
 	pub fn attrs_lower_decoded(&mut self) -> HashMap<String, String> {
@@ -143,11 +146,19 @@ impl HTMLElement {
 				serde_json::to_string(&replaced).unwrap_or_else(|_| format!("\"{}\"", replaced));
 			// jsoned 形如 "..."，去掉外层引号后处理内部转义
 			let inner = jsoned.trim_matches('"');
-			let inner = inner
-				.replace("\\t", "\t")
-				.replace("\\n", "\n")
-				.replace("\\r", "\r")
-				.replace('\\', "");
+			let re_ctrl = QUOTE_ESCAPED_CTRL_REGEX
+				.get_or_init(|| Regex::new(r"([^\\])\\([tnr])").unwrap());
+			let re_bs =
+				QUOTE_STRIP_BS_REGEX.get_or_init(|| Regex::new(r"([^\\])\\").unwrap());
+			let inner = re_ctrl
+				.replace_all(inner, |caps: &regex::Captures| match &caps[2] {
+					"t" => format!("{}\t", &caps[1]),
+					"n" => format!("{}\n", &caps[1]),
+					"r" => format!("{}\r", &caps[1]),
+					_ => caps[0].to_string(),
+				})
+				.to_string();
+			let inner = re_bs.replace_all(&inner, "$1").to_string();
 			format!("\"{}\"", inner)
 		}
 		self.raw_attrs = self
